@@ -205,3 +205,60 @@ The website includes a **Guide** page explaining:
 - match timing
 - penalties
 - player login process
+
+
+## V4 tournament-control features
+
+### Public live board before login
+The landing page now shows, without any player/admin login:
+- current live match and live score
+- next match
+- recent results
+- upcoming matches
+- tournament date, venue and start time
+
+### Admin tournament settings
+Admin can edit from the website:
+- tournament name
+- venue
+- date
+- start time
+- first-half duration
+- halftime
+- second-half duration
+- match changeover
+- final recovery
+- maximum squad
+- late-team grace period
+
+When a draw already exists, Admin can choose to recalculate the match schedule.
+
+### Live score control
+Admin can:
+- start a match as LIVE
+- update home/away live scores
+- stop LIVE status
+- enter/fix the final result
+- enter penalties for tied matches
+- automatically advance the winner
+
+Only one match is marked LIVE at a time.
+
+### Password-protected restart draw
+For testing, Admin can enter the current `ADMIN_PASSWORD` and restart the tournament draw.
+
+This clears:
+- A–N draw
+- bracket matches
+- live scores
+- final results
+
+It keeps:
+- team names
+- tournament settings
+
+There are optional checkboxes to also clear test players and announcements.
+
+### Manual draw after automatic draw
+Manual Draw is available even after an automatic draw.
+The current A–N assignments are preselected, so Admin can adjust the draw and regenerate the bracket.
