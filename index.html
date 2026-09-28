@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#07101d">
+  <title>3v3 Futsal Championship</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div id="toast" class="toast"></div>
+
+  <section id="loginView" class="login-shell">
+    <div class="hero">
+      <div class="ball">⚽</div>
+      <div class="eyebrow">14-TEAM KNOCKOUT</div>
+      <h1>3v3 Futsal Championship</h1>
+      <p>Live draw, bracket, fixtures, results and team information available from anywhere.</p>
+      <div class="stats">
+        <div><b>14</b><span>Teams</span></div>
+        <div><b>13</b><span>Matches</span></div>
+        <div><b>2</b><span>Random byes</span></div>
+        <div><b>3v3</b><span>Format</span></div>
+      </div>
+    </div>
+
+    <div class="login-card">
+      <div class="tabs">
+        <button class="tab active" data-tab="player">Player</button>
+        <button class="tab" data-tab="admin">Admin</button>
+      </div>
+
+      <form id="playerLogin" class="form">
+        <label>Your name<input id="playerName" required placeholder="Player name"></label>
+        <label>Team draw letter
+          <select id="playerDrawLetter" required>
+            <option value="">Select A–N...</option>
+            <option>A</option><option>B</option><option>C</option><option>D</option>
+            <option>E</option><option>F</option><option>G</option><option>H</option>
+            <option>I</option><option>J</option><option>K</option><option>L</option>
+            <option>M</option><option>N</option>
+          </select>
+        </label>
+        <div class="two">
+          <label>Shirt #<input id="playerShirt" type="number" min="0" max="99" placeholder="Optional"></label>
+          <label>Position
+            <select id="playerPosition">
+              <option>Player</option><option>Goalkeeper</option><option>Fixo</option><option>Ala</option><option>Pivot</option><option>Sub</option>
+            </select>
+          </label>
+        </div>
+        <button class="primary">Enter tournament</button>
+      </form>
+
+      <form id="adminLogin" class="form hidden">
+        <label>Username<input id="adminUsername" required autocomplete="username" value="admin"></label>
+        <label>Password<input id="adminPassword" type="password" required autocomplete="current-password"></label>
+        <button class="primary">Admin login</button>
+      </form>
+    </div>
+  </section>
+
+  <section id="appView" class="hidden app">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">3V3 FUTSAL CHAMPIONSHIP</div>
+        <h2 id="pageTitle">Home</h2>
+      </div>
+      <div class="top-actions">
+        <span id="userBadge"></span>
+        <button id="logoutBtn" class="ghost">Logout</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <section id="homePage" class="page"></section>
+      <section id="drawPage" class="page hidden"></section>
+      <section id="bracketPage" class="page hidden"></section>
+      <section id="matchesPage" class="page hidden"></section>
+      <section id="teamPage" class="page hidden"></section>
+      <section id="guidePage" class="page hidden"></section>
+      <section id="rulesPage" class="page hidden"></section>
+      <section id="noticesPage" class="page hidden"></section>
+      <section id="adminPage" class="page hidden"></section>
+    </main>
+
+    <nav class="bottom-nav">
+      <button class="nav-btn active" data-page="home"><span>⌂</span><small>Home</small></button>
+      <button class="nav-btn" data-page="draw"><span>🎲</span><small>Draw</small></button>
+      <button class="nav-btn" data-page="bracket"><span>⌘</span><small>Bracket</small></button>
+      <button class="nav-btn" data-page="matches"><span>▦</span><small>Matches</small></button>
+      <button class="nav-btn" data-page="team"><span>👥</span><small>Team</small></button>
+      <button class="nav-btn" data-page="guide"><span>?</span><small>Guide</small></button>
+      <button class="nav-btn" data-page="rules"><span>⚑</span><small>Rules</small></button>
+      <button class="nav-btn" data-page="notices"><span>🔔</span><small>Notices</small></button>
+      <button id="adminNav" class="nav-btn hidden" data-page="admin"><span>⚙</span><small>Admin</small></button>
+    </nav>
+  </section>
+
+  <div id="drawOverlay" class="draw-overlay hidden">
+    <div class="draw-stage">
+      <div class="draw-header">
+        <div class="eyebrow">LIVE RANDOM DRAW</div>
+        <h2 id="drawSlotLabel">Preparing draw...</h2>
+      </div>
+      <div class="draw-machine">
+        <div class="pot">⚽</div>
+        <div id="rollingName" class="rolling-name">Mixing teams...</div>
+      </div>
+      <div id="revealedName" class="revealed-name"></div>
+      <div class="draw-progress"><div id="drawProgressBar"></div></div>
+      <div id="drawCounter" class="draw-counter">0 / 14</div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
