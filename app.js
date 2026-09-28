@@ -2,7 +2,8 @@ const state={
   data:null, role:null,
   player:JSON.parse(localStorage.getItem("futsal_player")||"null"),
   adminToken:sessionStorage.getItem("futsal_admin_token")||"",
-  currentPage:"home", timer:null, publicTimer:null, drawAnimating:false
+  currentPage:"home", timer:null, publicTimer:null, drawAnimating:false,
+  adminDrawMode:"auto", manualDrawDraft:null
 };
 const $=id=>document.getElementById(id);
 const esc=(v="")=>String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
@@ -21,7 +22,10 @@ async function api(path,opt={}){
 }
 async function refresh(){
   state.data=await api(state.role==="admin"?"/api/admin/state":"/api/state");
-  if(state.role) renderAll();
+  if(state.role){
+    // Keep Admin forms stable during the 3.5-second background refresh.
+    renderAll({skipAdmin: state.role==="admin" && state.currentPage==="admin"});
+  }
   renderPublicBoard();
 }
 async function refreshPublicOnly(){
@@ -209,18 +213,29 @@ function manualDrawSlots(){
 function currentTeamForLetter(letter){return state.data.draw?.sequence?.find(x=>x.letter===letter)?.team_id||""}
 function teamOptions(selected=""){return `<option value="">Select team...</option>`+state.data.teams.map(t=>`<option value="${esc(t.id)}" ${selected===t.id?"selected":""}>${esc(t.name)}</option>`).join("")}
 function setAdminDrawMode(mode){
-  $("autoDrawSection")?.classList.toggle("hidden",mode!=="auto");$("manualDrawSection")?.classList.toggle("hidden",mode!=="manual");
+  state.adminDrawMode=mode;
+  if(mode==="manual" && !state.manualDrawDraft){
+    state.manualDrawDraft=Object.fromEntries(manualDrawSlots().map(x=>[x.letter,currentTeamForLetter(x.letter)]));
+  }
+  $("autoDrawSection")?.classList.toggle("hidden",mode!=="auto");
+  $("manualDrawSection")?.classList.toggle("hidden",mode!=="manual");
   document.querySelectorAll("[data-draw-mode]").forEach(b=>b.classList.toggle("active",b.dataset.drawMode===mode));
 }
 window.setAdminDrawMode=setAdminDrawMode;
 
 async function submitManualDraw(){
-  const order=[...document.querySelectorAll("[data-manual-slot]")].map(x=>x.value);
+  const selects=[...document.querySelectorAll("[data-manual-slot]")];
+  const order=selects.map(x=>x.value);
   if(order.some(v=>!v))return toast("Assign a team to every letter A–N.");
   if(new Set(order).size!==14)return toast("Each team must appear exactly once.");
-  if(state.data.draw.completed&&!confirm("Replace the existing automatic/manual draw and all current match results with this manual draw?"))return;
-  try{const out=await api("/api/admin/manual-draw",{method:"POST",body:JSON.stringify({team_order:order})});state.data=out.state;renderAll();renderPublicBoard();showPage("bracket");toast("Manual draw applied.")}
-  catch(e){toast(e.message)}
+  state.manualDrawDraft=Object.fromEntries(selects.map(x=>[x.dataset.manualSlot,x.value]));
+  if(state.data.draw.completed&&!confirm("Replace the existing draw and clear all current match results with this manual draw?"))return;
+  try{
+    const out=await api("/api/admin/manual-draw",{method:"POST",body:JSON.stringify({team_order:order})});
+    state.data=out.state;state.manualDrawDraft=null;state.adminDrawMode="manual";
+    renderAll();renderPublicBoard();showPage("admin");setAdminDrawMode("manual");
+    toast("Manual draw applied. Bracket regenerated.");
+  }catch(e){toast(e.message)}
 }
 window.submitManualDraw=submitManualDraw;
 
@@ -265,7 +280,7 @@ async function restartDraw(){
     const out=await api("/api/admin/restart-draw",{method:"POST",body:JSON.stringify({
       password,clear_players:$("restartPlayers").checked,clear_announcements:$("restartNotices").checked
     })});
-    state.data=out.state;renderAll();renderPublicBoard();toast("Draw and match results cleared. Ready for a fresh test draw.");
+    state.data=out.state;state.manualDrawDraft=null;state.adminDrawMode="auto";renderAll();renderPublicBoard();toast("Draw and match results cleared. Ready for a fresh test draw.");
   }catch(e){toast(e.message)}
 }
 window.restartDraw=restartDraw;
@@ -299,10 +314,10 @@ function renderAdmin(){
     </div>
 
     <div class="card span-12"><div class="section-title"><div><div class="kicker">DRAW CONTROL</div><h3>Automatic or manual letter draw</h3></div><span class="badge ${state.data.draw.completed?"ok":""}">${state.data.draw.completed?"Draw exists":"Ready"}</span></div>
-      <div class="draw-choice-tabs"><button class="secondary active" data-draw-mode="auto" onclick="setAdminDrawMode('auto')">Automatic animated draw</button><button class="secondary" data-draw-mode="manual" onclick="setAdminDrawMode('manual')">Manual / edit draw</button></div>
-      <div id="autoDrawSection"><p class="muted">Randomly assigns A–N and shows the animated reveal. A and H go directly to quarterfinals.</p><div class="actions"><button id="startDrawBtn" class="primary">${state.data.draw.completed?"Run another automatic draw":"Start animated draw"}</button><button class="secondary" onclick="showPage('draw')">View current draw</button></div></div>
-      <div id="manualDrawSection" class="hidden"><p class="muted">You can use this even after an automatic draw. Current assignments are pre-selected; change only the letters you need, making sure every team appears once.</p>
-        <div class="manual-draw-grid">${slots.map((s,i)=>`<div class="manual-slot"><div class="kicker">LETTER ${s.letter} · ${s.label}</div><select data-manual-slot="${s.letter}">${teamOptions(currentTeamForLetter(s.letter))}</select></div>`).join("")}</div>
+      <div class="draw-choice-tabs"><button class="secondary ${state.adminDrawMode==="auto"?"active":""}" data-draw-mode="auto" onclick="setAdminDrawMode('auto')">Automatic animated draw</button><button class="secondary ${state.adminDrawMode==="manual"?"active":""}" data-draw-mode="manual" onclick="setAdminDrawMode('manual')">Manual / edit draw</button></div>
+      <div id="autoDrawSection" class="${state.adminDrawMode==="auto"?"":"hidden"}"><p class="muted">Randomly assigns A–N and shows the animated reveal. A and H go directly to quarterfinals.</p><div class="actions"><button id="startDrawBtn" class="primary">${state.data.draw.completed?"Run another automatic draw":"Start animated draw"}</button>${state.data.draw.completed?`<button class="secondary" onclick="setAdminDrawMode('manual')">Edit current draw manually</button>`:""}<button class="secondary" onclick="showPage('draw')">View current draw</button></div></div>
+      <div id="manualDrawSection" class="${state.adminDrawMode==="manual"?"":"hidden"}"><p class="muted">You can use this even after an automatic draw. Current assignments are pre-selected; change only the letters you need, making sure every team appears once. This editor stays open while you work.</p>
+        <div class="manual-draw-grid">${slots.map((slot,i)=>{const selected=state.manualDrawDraft?.[slot.letter]??currentTeamForLetter(slot.letter);return `<div class="manual-slot"><div class="kicker">LETTER ${slot.letter} · ${slot.label}</div><select data-manual-slot="${slot.letter}" onchange="state.manualDrawDraft=state.manualDrawDraft||{};state.manualDrawDraft['${slot.letter}']=this.value">${teamOptions(selected)}</select></div>`}).join("")}</div>
         <div class="actions" style="margin-top:14px"><button class="primary" onclick="submitManualDraw()">Apply manual letter draw</button></div>
       </div>
     </div>
@@ -334,7 +349,7 @@ function renderAdmin(){
   $("settingsForm")?.addEventListener("submit",saveSettings);
   $("noticeForm")?.addEventListener("submit",postNotice);
 }
-function renderAll(){if(!state.data)return;renderHome();renderDraw();renderBracket();renderMatches();renderTeam();renderGuide();renderRules();renderNotices();renderAdmin()}
+function renderAll(opts={}){if(!state.data)return;renderHome();renderDraw();renderBracket();renderMatches();renderTeam();renderGuide();renderRules();renderNotices();if(!opts.skipAdmin)renderAdmin()}
 
 (async()=>{
   await refreshPublicOnly();
