@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#07101d">
   <title>3v3 Futsal Championship</title>
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/styles.css?v=4.1.0">
 </head>
 <body>
   <div id="toast" class="toast"></div>
@@ -21,6 +21,21 @@
         <div><b>13</b><span>Matches</span></div>
         <div><b>2</b><span>Random byes</span></div>
         <div><b>3v3</b><span>Format</span></div>
+      </div>
+    </div>
+
+
+    <div id="publicBoard" class="public-board">
+      <div class="public-board-head">
+        <div>
+          <div class="eyebrow">PUBLIC LIVE SCORE · NO LOGIN REQUIRED</div>
+          <h2>Live Tournament <span class="badge">V4.1</span></h2>
+          <div class="muted">Updates automatically every 4 seconds.</div>
+        </div>
+        <button id="publicRefreshBtn" class="ghost" type="button">Refresh</button>
+      </div>
+      <div id="publicBoardBody">
+        <div class="notice">Loading live tournament data...</div>
       </div>
     </div>
 
@@ -57,19 +72,6 @@
         <label>Password<input id="adminPassword" type="password" required autocomplete="current-password"></label>
         <button class="primary">Admin login</button>
       </form>
-    </div>
-
-    <div id="publicBoard" class="public-board">
-      <div class="public-board-head">
-        <div>
-          <div class="eyebrow">PUBLIC LIVE BOARD</div>
-          <h2>Live Tournament</h2>
-        </div>
-        <button id="publicRefreshBtn" class="ghost" type="button">Refresh</button>
-      </div>
-      <div id="publicBoardBody">
-        <div class="notice">Loading live tournament data...</div>
-      </div>
     </div>
   </section>
 
@@ -126,6 +128,6 @@
     </div>
   </div>
 
-  <script src="/app.js"></script>
+  <script src="/app.js?v=4.1.0"></script>
 </body>
 </html>

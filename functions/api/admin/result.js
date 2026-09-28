@@ -1,7 +1,7 @@
 import { json, body, isAdmin, getState } from "../../_utils.js";
 const DEST = {
   M1:["QF1","away_team_id"], M2:["QF2","home_team_id"], M3:["QF2","away_team_id"],
-  M4:["QF3","home_team_id"], M5:["QF3","away_team_id"], M6:["QF4","home_team_id"],
+  M4:["QF3","away_team_id"], M5:["QF4","home_team_id"], M6:["QF4","away_team_id"],
   QF1:["SF1","home_team_id"], QF2:["SF1","away_team_id"], QF3:["SF2","home_team_id"], QF4:["SF2","away_team_id"],
   SF1:["F","home_team_id"], SF2:["F","away_team_id"]
 };
