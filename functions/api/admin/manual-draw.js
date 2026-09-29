@@ -37,7 +37,7 @@ export async function onRequestPost(context) {
     const start=minutes(cfg.start_time);
     const matches=[];
 
-    [["M1","A","B"],["M2","C","D"],["M3","E","F"],["M4","G","H"],["M5","I","J"],["M6","K","L"],["M7","M","N"]]
+    [["M1","B","C"],["M2","D","E"],["M3","F","G"],["M4","I","J"],["M5","K","L"],["M6","M","N"],["M7","H","A"]]
       .forEach((p,i)=>matches.push([
         p[0],"Round 1",byLetter[p[1]].id,byLetter[p[2]].id,
         null,null,cfg.date,hhmm(start+i*slot),"Court 1",i+1
@@ -79,13 +79,13 @@ export async function onRequestPost(context) {
 
 function matchSlot(letter){
   const map={
-    A:"M1 · Team 1", B:"M1 · Team 2",
-    C:"M2 · Team 1", D:"M2 · Team 2",
-    E:"M3 · Team 1", F:"M3 · Team 2",
-    G:"M4 · Team 1", H:"M4 · Team 2",
-    I:"M5 · Team 1", J:"M5 · Team 2",
-    K:"M6 · Team 1", L:"M6 · Team 2",
-    M:"M7 · Team 1", N:"M7 · Team 2"
+    A:"M7 · Team 2", B:"M1 · Team 1", C:"M1 · Team 2",
+    D:"M2 · Team 1", E:"M2 · Team 2",
+    F:"M3 · Team 1", G:"M3 · Team 2",
+    H:"M7 · Team 1",
+    I:"M4 · Team 1", J:"M4 · Team 2",
+    K:"M5 · Team 1", L:"M5 · Team 2",
+    M:"M6 · Team 1", N:"M6 · Team 2"
   };
   return map[letter] || "";
 }
