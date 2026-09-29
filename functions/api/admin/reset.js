@@ -9,7 +9,7 @@ export async function onRequestPost(context) {
       DB.prepare("DELETE FROM announcements"),
       DB.prepare("INSERT INTO meta(key,value) VALUES('draw_completed','0') ON CONFLICT(key) DO UPDATE SET value=excluded.value"),
       DB.prepare("INSERT INTO meta(key,value) VALUES('draw_sequence','[]') ON CONFLICT(key) DO UPDATE SET value=excluded.value"),
-      DB.prepare("DELETE FROM meta WHERE key IN ('bye_a','bye_b')")
+      DB.prepare("DELETE FROM meta WHERE key IN ('bye_a','bye_b','round2_bye_source')")
     ]);
     return json({ok:true,state:await getState(DB,true)});
   } catch(e) { return json({error:e.message},500); }
