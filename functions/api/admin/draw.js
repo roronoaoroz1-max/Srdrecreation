@@ -20,7 +20,7 @@ export async function onRequestPost(context) {
       sequence.push({
         draw_no:i+1,
         letter,
-        slot: letter==="A" || letter==="H" ? "Direct Quarterfinal" : matchSlot(letter),
+        slot: matchSlot(letter),
         team_id:team.id,
         team_name:team.name
       });
@@ -32,12 +32,13 @@ export async function onRequestPost(context) {
     const matches=[];
 
     const r1Pairs=[
-      ["M1","B","C"],
-      ["M2","D","E"],
-      ["M3","F","G"],
-      ["M4","I","J"],
-      ["M5","K","L"],
-      ["M6","M","N"]
+      ["M1","A","B"],
+      ["M2","C","D"],
+      ["M3","E","F"],
+      ["M4","G","H"],
+      ["M5","I","J"],
+      ["M6","K","L"],
+      ["M7","M","N"]
     ];
     r1Pairs.forEach((p,i)=>{
       matches.push([
@@ -46,24 +47,23 @@ export async function onRequestPost(context) {
       ]);
     });
 
-    const q=start+6*slot;
-    matches.push(["QF1","Quarterfinal",byLetter.A.id,null,"Letter A","Winner M1",cfg.date,hhmm(q),"Court 1",7]);
-    matches.push(["QF2","Quarterfinal",null,null,"Winner M2","Winner M3",cfg.date,hhmm(q+slot),"Court 1",8]);
-    matches.push(["QF3","Quarterfinal",byLetter.H.id,null,"Letter H","Winner M4",cfg.date,hhmm(q+2*slot),"Court 1",9]);
-    matches.push(["QF4","Quarterfinal",null,null,"Winner M5","Winner M6",cfg.date,hhmm(q+3*slot),"Court 1",10]);
+    const q=start+7*slot;
+    matches.push(["QF1","Quarterfinal",null,null,"Winner M1","Winner M2",cfg.date,hhmm(q),"Court 1",8]);
+    matches.push(["QF2","Quarterfinal",null,null,"Winner M3","Winner M4",cfg.date,hhmm(q+slot),"Court 1",9]);
+    matches.push(["QF3","Quarterfinal",null,null,"Winner M5","Winner M6",cfg.date,hhmm(q+2*slot),"Court 1",10]);
 
-    const s=q+4*slot;
-    matches.push(["SF1","Semifinal",null,null,"Winner QF1","Winner QF2",cfg.date,hhmm(s),"Court 1",11]);
-    matches.push(["SF2","Semifinal",null,null,"Winner QF3","Winner QF4",cfg.date,hhmm(s+slot),"Court 1",12]);
+    const sf=q+3*slot;
+    matches.push(["SF1","Semifinal",null,null,"Winner QF1","Winner QF2",cfg.date,hhmm(sf),"Court 1",11]);
+    matches.push(["SF2","Semifinal",null,null,"Winner QF3","Winner M7 (Round 2 bye)",cfg.date,hhmm(sf+slot),"Court 1",12]);
 
-    const f=s+2*slot+cfg.final_recovery;
+    const f=sf+2*slot+cfg.final_recovery;
     matches.push(["F","Final",null,null,"Winner SF1","Winner SF2",cfg.date,hhmm(f),"Court 1",13]);
 
     const statements=[
       DB.prepare("DELETE FROM matches"),
       DB.prepare("INSERT INTO meta(key,value) VALUES('draw_completed','1') ON CONFLICT(key) DO UPDATE SET value=excluded.value"),
-      DB.prepare("INSERT INTO meta(key,value) VALUES('bye_a',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").bind(byLetter.A.id),
-      DB.prepare("INSERT INTO meta(key,value) VALUES('bye_b',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").bind(byLetter.H.id),
+      DB.prepare("DELETE FROM meta WHERE key IN ('bye_a','bye_b')"),
+      DB.prepare("INSERT INTO meta(key,value) VALUES('round2_bye_source','Winner M7') ON CONFLICT(key) DO UPDATE SET value=excluded.value"),
       DB.prepare("INSERT INTO meta(key,value) VALUES('draw_sequence',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").bind(JSON.stringify(sequence))
     ];
 
@@ -83,12 +83,13 @@ export async function onRequestPost(context) {
 
 function matchSlot(letter){
   const map={
-    B:"M1 · Team 1", C:"M1 · Team 2",
-    D:"M2 · Team 1", E:"M2 · Team 2",
-    F:"M3 · Team 1", G:"M3 · Team 2",
-    I:"M4 · Team 1", J:"M4 · Team 2",
-    K:"M5 · Team 1", L:"M5 · Team 2",
-    M:"M6 · Team 1", N:"M6 · Team 2"
+    A:"M1 · Team 1", B:"M1 · Team 2",
+    C:"M2 · Team 1", D:"M2 · Team 2",
+    E:"M3 · Team 1", F:"M3 · Team 2",
+    G:"M4 · Team 1", H:"M4 · Team 2",
+    I:"M5 · Team 1", J:"M5 · Team 2",
+    K:"M6 · Team 1", L:"M6 · Team 2",
+    M:"M7 · Team 1", N:"M7 · Team 2"
   };
   return map[letter] || "";
 }
