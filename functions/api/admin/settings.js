@@ -12,13 +12,13 @@ export async function onRequestPost(context) {
       first_half:Number(d.first_half), halftime:Number(d.halftime),
       second_half:Number(d.second_half), changeover:Number(d.changeover),
       final_recovery:Number(d.final_recovery), max_squad:Number(d.max_squad),
-      grace_minutes:Number(d.grace_minutes)
+      grace_minutes:Number(d.grace_minutes), arrival_minutes:Number(d.arrival_minutes)
     };
     if(!cfg.tournament_name) return json({error:"Tournament name is required"},400);
     if(!cfg.venue) return json({error:"Venue is required"},400);
     if(!/^\d{4}-\d{2}-\d{2}$/.test(cfg.date)) return json({error:"Invalid tournament date"},400);
     if(!/^\d{2}:\d{2}$/.test(cfg.start_time)) return json({error:"Invalid start time"},400);
-    for(const k of ["first_half","halftime","second_half","changeover","final_recovery","max_squad","grace_minutes"]){
+    for(const k of ["first_half","halftime","second_half","changeover","final_recovery","max_squad","grace_minutes","arrival_minutes"]){
       if(!Number.isFinite(cfg[k])||cfg[k]<0) return json({error:`Invalid ${k}`},400);
     }
     if(cfg.max_squad<3) return json({error:"Maximum squad must be at least 3"},400);
@@ -29,7 +29,8 @@ export async function onRequestPost(context) {
       config_first_half:String(cfg.first_half), config_halftime:String(cfg.halftime),
       config_second_half:String(cfg.second_half), config_changeover:String(cfg.changeover),
       config_final_recovery:String(cfg.final_recovery), config_max_squad:String(cfg.max_squad),
-      config_grace_minutes:String(cfg.grace_minutes)
+      config_grace_minutes:String(cfg.grace_minutes),
+      config_arrival_minutes:String(cfg.arrival_minutes)
     };
     await DB.batch(Object.entries(map).map(([k,v])=>
       DB.prepare("INSERT INTO meta(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").bind(k,v)

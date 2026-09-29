@@ -102,3 +102,27 @@ table{width:100%;border-collapse:collapse;min-width:760px}th,td{padding:10px;bor
 }
 
 .badge.live{background:#4d2030;color:#ffd0d8}
+
+/* V4.2: live schedule adjustments, player arrival time, mobile admin */
+.arrival-note{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:0 0 10px;padding:11px 13px;border:1px solid #315b70;background:#0d2937;border-radius:13px}
+.arrival-note b{color:#d7fbff}.arrival-note span{color:var(--muted);font-size:12px;text-align:right}
+.player-match-block{padding:4px 0 10px;border-bottom:1px solid var(--line)}.player-match-block:last-child{border-bottom:0}
+.player-match-block .fixture{border-bottom:0}
+
+.admin-page-grid{align-items:start}
+.admin-section{scroll-margin-top:88px}
+.admin-quick-nav{position:sticky;top:73px;z-index:24;display:flex;gap:8px;align-items:center;padding:10px;margin-bottom:12px;background:rgba(7,16,29,.96);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:15px;overflow-x:auto;box-shadow:0 12px 30px rgba(0,0,0,.22)}
+.admin-quick-nav button{white-space:nowrap;flex:0 0 auto}
+.schedule-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.schedule-card{min-width:0;border:1px solid var(--line);background:#0c182a;border-radius:14px;padding:13px}
+.schedule-card-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}
+.schedule-card-head>div{display:flex;gap:8px;align-items:baseline;min-width:0}.schedule-card-head span:not(.badge){font-size:12px;color:var(--muted)}
+.schedule-teams{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:10px}.schedule-teams span{color:var(--muted);font-weight:500;margin:0 4px}
+.schedule-time-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:7px;align-items:center}.schedule-time-row input{font-size:18px;font-weight:900;padding:10px}
+.secondary.compact{padding:10px 12px;min-width:50px}.schedule-shift{margin:9px 0}.schedule-save{width:100%}
+.live-control.is-live{border-color:#7c4051;box-shadow:inset 0 0 0 1px rgba(251,113,133,.18)}
+.manual-stable-note{margin-bottom:12px}.mobile-only{display:none}.mobile-results{gap:10px}
+.mobile-result-card{display:grid;gap:9px;border:1px solid var(--line);background:#0c182a;border-radius:14px;padding:12px}
+.mobile-result-teams{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:center}.mobile-result-teams span:last-child{text-align:right}.mobile-result-teams strong{font-size:20px}
+@media(max-width:700px){.content{padding:10px 10px 18px}.card{padding:14px;border-radius:18px}.topbar{padding:11px 12px}.topbar h2{font-size:20px}.top-actions button{padding:9px 11px}input,select,textarea{font-size:16px;min-height:44px}button{min-height:44px}.section-title{align-items:flex-start;flex-wrap:wrap}.admin-quick-nav{top:61px;margin:0 0 10px;border-radius:12px;padding:8px}.admin-quick-nav button{min-height:40px;padding:8px 11px}.settings-grid{grid-template-columns:1fr}.settings-grid .wide{grid-column:auto}.admin-grid{grid-template-columns:1fr}.admin-grid .wide{grid-column:auto}.manual-draw-grid{grid-template-columns:1fr}.draw-choice-tabs{display:grid;grid-template-columns:1fr 1fr}.draw-choice-tabs button{width:100%;padding:10px 8px}.schedule-grid{grid-template-columns:1fr}.schedule-time-row{grid-template-columns:minmax(0,1fr) auto auto}.schedule-time-row input{min-width:0}.live-control{padding:12px}.live-control-grid{gap:10px}.live-score-inputs{grid-template-columns:1fr 1fr;gap:8px}.score-stepper{grid-template-columns:40px minmax(0,1fr) 40px}.score-stepper button{padding:8px 4px;min-width:40px}.score-stepper input{padding:8px 4px}.live-actions{display:grid;grid-template-columns:1fr 1fr}.live-actions .primary{grid-column:1 / -1}.live-actions button{width:100%}.actions{display:grid;grid-template-columns:1fr}.actions button{width:100%}.team-editor-row{grid-template-columns:38px minmax(0,1fr);align-items:center}.team-editor-row .team-code-field{grid-column:2}.team-editor-row .team-number{width:34px;height:34px}.desktop-only{display:none!important}.mobile-only{display:grid}.arrival-note{display:grid;gap:3px}.arrival-note span{text-align:left}.public-board{padding:14px}.public-board-head{align-items:flex-start;flex-wrap:wrap}.public-score{font-size:28px;min-width:72px}.public-scoreline{gap:7px}.restart-box{padding:12px}}
+@media(max-width:390px){.draw-choice-tabs{grid-template-columns:1fr}.live-score-inputs{grid-template-columns:1fr}.live-actions{grid-template-columns:1fr}.live-actions .primary{grid-column:auto}.schedule-time-row{grid-template-columns:1fr 1fr}.schedule-time-row input{grid-column:1 / -1}.stats{grid-template-columns:1fr 1fr}}

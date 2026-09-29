@@ -99,7 +99,8 @@ export async function getConfig(DB) {
     changeover: Number(map.config_changeover || 5),
     final_recovery: Number(map.config_final_recovery || 20),
     max_squad: Number(map.config_max_squad || 6),
-    grace_minutes: Number(map.config_grace_minutes || 3)
+    grace_minutes: Number(map.config_grace_minutes || 3),
+    arrival_minutes: Number(map.config_arrival_minutes || 5)
   };
 }
 
