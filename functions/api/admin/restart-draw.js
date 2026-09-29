@@ -12,7 +12,7 @@ export async function onRequestPost(context){
       DB.prepare("DELETE FROM matches"),
       DB.prepare("INSERT INTO meta(key,value) VALUES('draw_completed','0') ON CONFLICT(key) DO UPDATE SET value=excluded.value"),
       DB.prepare("INSERT INTO meta(key,value) VALUES('draw_sequence','[]') ON CONFLICT(key) DO UPDATE SET value=excluded.value"),
-      DB.prepare("DELETE FROM meta WHERE key IN ('bye_a','bye_b')")
+      DB.prepare("DELETE FROM meta WHERE key IN ('bye_a','bye_b','round2_bye_source')")
     ];
     if(d.clear_players) q.push(DB.prepare("DELETE FROM players"));
     if(d.clear_announcements) q.push(DB.prepare("DELETE FROM announcements"));
