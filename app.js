@@ -182,12 +182,12 @@ function renderTeam(){
 }
 function renderGuide(){
   const c=state.data.config,rows=[
-    ["A","M1 Team 1"],["B","M1 Team 2"],["C","M2 Team 1"],["D","M2 Team 2"],
-    ["E","M3 Team 1"],["F","M3 Team 2"],["G","M4 Team 1"],["H","M4 Team 2"],
-    ["I","M5 Team 1"],["J","M5 Team 2"],["K","M6 Team 1"],["L","M6 Team 2"],
-    ["M","M7 Team 1"],["N","M7 Team 2"]
+    ["A","M7 Team 2"],["B","M1 Team 1"],["C","M1 Team 2"],
+    ["D","M2 Team 1"],["E","M2 Team 2"],["F","M3 Team 1"],["G","M3 Team 2"],
+    ["H","M7 Team 1"],["I","M4 Team 1"],["J","M4 Team 2"],
+    ["K","M5 Team 1"],["L","M5 Team 2"],["M","M6 Team 1"],["N","M6 Team 2"]
   ];
-  $("guidePage").innerHTML=`<div class="card"><div class="kicker">ONE-PAGE TOURNAMENT GUIDE</div><h3>How the tournament works</h3><p class="muted">All 14 teams play in Round 1, creating 7 winners. In Round 2, the winner of M7 receives the bye and advances directly to SF2. The other 6 winners play 3 quarterfinal matches.</p><div class="notice"><b>M1:</b> A vs B · <b>M2:</b> C vs D · <b>M3:</b> E vs F · <b>M4:</b> G vs H<br><b>M5:</b> I vs J · <b>M6:</b> K vs L · <b>M7:</b> M vs N<br><br><b>QF1:</b> Winner M1 vs Winner M2<br><b>QF2:</b> Winner M3 vs Winner M4<br><b>QF3:</b> Winner M5 vs Winner M6<br><b>Winner M7:</b> Round 2 bye → SF2<br><br><b>SF1:</b> Winner QF1 vs Winner QF2<br><b>SF2:</b> Winner QF3 vs Winner M7<br>Then Final.</div></div>
+  $("guidePage").innerHTML=`<div class="card"><div class="kicker">ONE-PAGE TOURNAMENT GUIDE</div><h3>How the tournament works</h3><p class="muted">All 14 teams play in Round 1, creating 7 winners. In Round 2, the winner of M7 receives the bye and advances directly to SF2. The other 6 winners play 3 quarterfinal matches.</p><div class="notice"><b>M1:</b> B vs C · <b>M2:</b> D vs E · <b>M3:</b> F vs G · <b>M4:</b> I vs J<br><b>M5:</b> K vs L · <b>M6:</b> M vs N · <b>M7:</b> H vs A<br><br><b>QF1:</b> Winner M1 vs Winner M2<br><b>QF2:</b> Winner M3 vs Winner M4<br><b>QF3:</b> Winner M5 vs Winner M6<br><b>Winner M7:</b> Round 2 bye → SF2<br><br><b>SF1:</b> Winner QF1 vs Winner QF2<br><b>SF2:</b> Winner QF3 vs Winner M7<br>Then Final.</div></div>
   <div class="card"><div class="section-title"><h3>Letter positions</h3><span class="badge">A–N</span></div><div class="table-wrap"><table><thead><tr><th>Letter</th><th>Position</th></tr></thead><tbody>${rows.map(([a,b])=>`<tr><td><b>${a}</b></td><td>${b}</td></tr>`).join("")}</tbody></table></div></div>
   <div class="card"><h3>Timing & login</h3><div class="rule-grid"><div class="rule"><strong>${c.first_half}+${c.halftime}+${c.second_half} min</strong><span class="muted">First half + halftime + second half</span></div><div class="rule"><strong>${c.changeover} min</strong><span class="muted">Changeover</span></div><div class="rule"><strong>Arrive ${c.arrival_minutes??5} min early</strong><span class="muted">Players see a “be at stadium by” time for every upcoming team match.</span></div><div class="rule"><strong>Public live board</strong><span class="muted">Scores can be viewed before login.</span></div><div class="rule"><strong>Player login</strong><span class="muted">Name + team draw letter after the draw.</span></div></div></div>`;
 }
@@ -226,13 +226,13 @@ window.enterResult=enterResult;
 
 function manualDrawSlots(){
   return [
-    {letter:"A",label:"M1 Team 1"},{letter:"B",label:"M1 Team 2"},
-    {letter:"C",label:"M2 Team 1"},{letter:"D",label:"M2 Team 2"},
-    {letter:"E",label:"M3 Team 1"},{letter:"F",label:"M3 Team 2"},
-    {letter:"G",label:"M4 Team 1"},{letter:"H",label:"M4 Team 2"},
-    {letter:"I",label:"M5 Team 1"},{letter:"J",label:"M5 Team 2"},
-    {letter:"K",label:"M6 Team 1"},{letter:"L",label:"M6 Team 2"},
-    {letter:"M",label:"M7 Team 1"},{letter:"N",label:"M7 Team 2"}
+    {letter:"A",label:"M7 Team 2"},{letter:"B",label:"M1 Team 1"},{letter:"C",label:"M1 Team 2"},
+    {letter:"D",label:"M2 Team 1"},{letter:"E",label:"M2 Team 2"},
+    {letter:"F",label:"M3 Team 1"},{letter:"G",label:"M3 Team 2"},
+    {letter:"H",label:"M7 Team 1"},
+    {letter:"I",label:"M4 Team 1"},{letter:"J",label:"M4 Team 2"},
+    {letter:"K",label:"M5 Team 1"},{letter:"L",label:"M5 Team 2"},
+    {letter:"M",label:"M6 Team 1"},{letter:"N",label:"M6 Team 2"}
   ];
 }
 function currentTeamForLetter(letter){return state.data.draw?.sequence?.find(x=>x.letter===letter)?.team_id||""}
