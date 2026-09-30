@@ -1,3 +1,6 @@
+const isProjectorMode=new URLSearchParams(window.location.search).get("projector")==="1";
+document.body.classList.toggle("projector-mode",isProjectorMode);
+
 const state={
   data:null, role:null,
   player:JSON.parse(localStorage.getItem("futsal_player")||"null"),
@@ -95,6 +98,7 @@ function setPublicLogin(open){
   const card=$("loginCard");
   const show=$("showLoginBtn");
   if(!card||!show)return;
+  if(isProjectorMode)open=false;
   card.classList.toggle("hidden",!open);
   show.setAttribute("aria-expanded",open?"true":"false");
   show.textContent=open?"Login open":"Open login";
@@ -102,6 +106,15 @@ function setPublicLogin(open){
 }
 $("showLoginBtn")?.addEventListener("click",()=>setPublicLogin($("loginCard")?.classList.contains("hidden")));
 $("hideLoginBtn")?.addEventListener("click",()=>setPublicLogin(false));
+const projectorLink=$("projectorViewLink");
+if(projectorLink){
+  if(isProjectorMode){
+    projectorLink.textContent="Exit projector view";
+    projectorLink.href=window.location.pathname;
+  }else{
+    projectorLink.href=window.location.pathname+"?projector=1";
+  }
+}
 document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
 
 async function enterApp(){
@@ -505,5 +518,5 @@ function renderAll(opts={}){if(!state.data)return;renderHome();renderDraw();rend
 (async()=>{
   await refreshPublicOnly();
   clearInterval(state.publicTimer);state.publicTimer=setInterval(()=>{if(!state.role)refreshPublicOnly()},4000);
-  if(state.player){state.role="player";try{await enterApp()}catch{state.role=null}}
+  if(!isProjectorMode && state.player){state.role="player";try{await enterApp()}catch{state.role=null}}
 })();
