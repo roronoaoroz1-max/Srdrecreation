@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#07101d">
   <title>BOATYARD PISTON CUP 26</title>
-  <link rel="stylesheet" href="/styles.css?v=4.5.3">
+  <link rel="stylesheet" href="/styles.css?v=4.6.0">
 </head>
 <body>
   <div id="toast" class="toast"></div>
@@ -15,10 +15,13 @@
       <div class="public-board-head">
         <div>
           <div class="eyebrow">LIVE TOURNAMENT · NO LOGIN REQUIRED</div>
-          <h2>Next Match & Live Score <span class="badge">V4.5.3</span></h2>
+          <h2>Next Match & Live Score <span class="badge">V4.6.0</span></h2>
           <div class="muted">The live match or next scheduled match is always shown first.</div>
         </div>
-        <button id="publicRefreshBtn" class="ghost" type="button">Refresh</button>
+        <div class="public-board-actions">
+          <a id="projectorViewLink" class="ghost projector-link" href="?projector=1">Projector view</a>
+          <button id="publicRefreshBtn" class="ghost" type="button">Refresh</button>
+        </div>
       </div>
       <div id="publicBoardBody">
         <div class="notice">Loading live tournament data...</div>
@@ -139,6 +142,6 @@
     </div>
   </div>
 
-  <script src="/app.js?v=4.5.3"></script>
+  <script src="/app.js?v=4.6.0"></script>
 </body>
 </html>
