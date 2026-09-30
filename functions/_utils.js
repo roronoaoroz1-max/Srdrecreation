@@ -85,6 +85,13 @@ export function hhmm(n) {
   return `${String(Math.floor(n/60)).padStart(2,"0")}:${String(n%60).padStart(2,"0")}`;
 }
 
+export async function ensureTournamentTeams(DB) {
+  await DB.batch([
+    DB.prepare("INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t15','Kuda Adi','KDA-001',15)"),
+    DB.prepare("INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t16','Precast SC','PSC-001',16)")
+  ]);
+}
+
 export async function getConfig(DB) {
   const rows = await DB.prepare("SELECT key,value FROM meta WHERE key LIKE 'config_%'").all();
   const map = Object.fromEntries((rows.results||[]).map(r=>[r.key,r.value]));
@@ -105,6 +112,7 @@ export async function getConfig(DB) {
 }
 
 export async function getState(DB, includeCodes=false) {
+  await ensureTournamentTeams(DB);
   const [teamsQ, playersQ, matchesQ, noticesQ, metaQ] = await Promise.all([
     DB.prepare(`SELECT id,name${includeCodes ? ",code" : ""} FROM teams ORDER BY sort_order`).all(),
     DB.prepare("SELECT id,name,team_id,shirt_no,position,created_at FROM players ORDER BY created_at").all(),
