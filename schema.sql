@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS meta (
 INSERT OR IGNORE INTO meta(key,value) VALUES
 ('draw_completed','0'),
 ('draw_sequence','[]'),
-('config_tournament_name','3v3 Futsal Championship'),
+('config_tournament_name','BOATYARD PISTON CUP 26'),
 ('config_venue','Boatyard Futsal Area'),
 ('config_date','2026-10-01'),
 ('config_start_time','09:00'),
