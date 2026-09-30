@@ -4,10 +4,10 @@ export async function onRequestPost(context) {
   try {
     const data = await body(context.request);
     const name = String(data.name || "").trim();
-    const letter = String(data.draw_letter || "").trim().toUpperCase();
+    const access = String(data.draw_letter || "").trim().toUpperCase();
 
     if (!name) return json({error:"Enter your name"},400);
-    if (!/^[A-N]$/.test(letter)) return json({error:"Select your team draw letter A–N"},400);
+    if (!/^(?:[A-N]|KDA|WTC)$/.test(access)) return json({error:"Select your draw letter A–N or fixed M8 team code"},400);
 
     const meta = await context.env.DB.prepare("SELECT value FROM meta WHERE key='draw_sequence'").first();
     let sequence = [];
@@ -17,13 +17,14 @@ export async function onRequestPost(context) {
       return json({error:"The official draw has not been completed yet"},400);
     }
 
-    const assignment = sequence.find(x => String(x.letter || "").toUpperCase() === letter);
+    const fixedTeamId = access==="KDA" ? "t15" : access==="WTC" ? "t9" : null;
+    const assignment = fixedTeamId ? {team_id:fixedTeamId} : sequence.find(x => String(x.letter || "").toUpperCase() === access);
     if (!assignment?.team_id) {
-      return json({error:"That draw letter is not assigned to a team"},400);
+      return json({error:"That draw letter or team code is not assigned"},400);
     }
 
     const team = await context.env.DB.prepare("SELECT id,name FROM teams WHERE id=?").bind(assignment.team_id).first();
-    if (!team) return json({error:"Team not found for this draw letter"},404);
+    if (!team) return json({error:"Team not found"},404);
 
     let player = await context.env.DB.prepare(
       "SELECT id,name,team_id,shirt_no,position FROM players WHERE lower(name)=lower(?) AND team_id=? LIMIT 1"
@@ -48,7 +49,7 @@ export async function onRequestPost(context) {
       };
     }
 
-    return json({ok:true,player,team,draw_letter:letter});
+    return json({ok:true,player,team,draw_letter:access});
   } catch(e) {
     return json({error:e.message},500);
   }
