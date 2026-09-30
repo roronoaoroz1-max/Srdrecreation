@@ -391,12 +391,40 @@ async function saveTeams(){
     id:row.dataset.teamId,name:row.querySelector("[data-team-name]").value.trim(),code:row.querySelector("[data-team-code]").value.trim().toUpperCase()
   }));
   if(teams.some(t=>!t.name||!t.code))return toast("Every team needs a name and internal code.");
-  if(new Set(teams.map(t=>t.name.toLowerCase())).size!==14)return toast("Team names must be unique.");
-  if(new Set(teams.map(t=>t.code)).size!==14)return toast("Internal codes must be unique.");
+  if(new Set(teams.map(t=>t.name.toLowerCase())).size!==16)return toast("Team names must be unique.");
+  if(new Set(teams.map(t=>t.code)).size!==16)return toast("Internal codes must be unique.");
   try{const out=await api("/api/admin/teams",{method:"POST",body:JSON.stringify({teams})});state.data=out.state;renderAll();toast("Team list saved.")}
   catch(e){toast(e.message)}
 }
 window.saveTeams=saveTeams;
+
+async function editAdminPlayer(playerId){
+  const input=document.querySelector(`[data-admin-player-name="${CSS.escape(playerId)}"]`);
+  const name=input?.value.trim();
+  if(!name)return toast("Player name cannot be empty.");
+  try{
+    const out=await api("/api/admin/players",{method:"POST",body:JSON.stringify({action:"edit",player_id:playerId,name})});
+    state.data=out.state;
+    renderAdmin();renderPublicTeams();
+    setTimeout(()=>scrollAdminSection("adminPlayersSection"),0);
+    toast("Player name updated.");
+  }catch(e){toast(e.message)}
+}
+window.editAdminPlayer=editAdminPlayer;
+
+async function addAdminPlayer(teamId){
+  const input=document.querySelector(`[data-admin-new-player="${CSS.escape(teamId)}"]`);
+  const name=input?.value.trim();
+  if(!name)return toast("Enter the new player name.");
+  try{
+    const out=await api("/api/admin/players",{method:"POST",body:JSON.stringify({action:"add",team_id:teamId,name})});
+    state.data=out.state;
+    renderAdmin();renderPublicTeams();
+    setTimeout(()=>scrollAdminSection("adminPlayersSection"),0);
+    toast("Player added.");
+  }catch(e){toast(e.message)}
+}
+window.addAdminPlayer=addAdminPlayer;
 
 async function saveSettings(e){
   e.preventDefault();
@@ -471,6 +499,7 @@ function renderAdmin(){
       <button type="button" class="secondary" onclick="scrollAdminSection('adminDrawSection')">🎲 Draw</button>
       <button type="button" class="secondary" onclick="scrollAdminSection('adminSettingsSection')">⚙ Settings</button>
       <button type="button" class="secondary" onclick="scrollAdminSection('adminTeamsSection')">👥 Teams</button>
+      <button type="button" class="secondary" onclick="scrollAdminSection('adminPlayersSection')">🧑 Players</button>
       <button type="button" class="ghost" onclick="refreshAdminNow()">↻ Refresh</button>
     </div>
     <div class="grid admin-page-grid">
@@ -525,6 +554,21 @@ function renderAdmin(){
     </div>
 
     <div id="adminTeamsSection" class="card span-12 admin-section"><div class="section-title"><div><div class="kicker">TEAM MANAGER</div><h3>Edit all 16 teams</h3></div><span class="badge">16 slots</span></div><div class="team-editor">${state.data.teams.map((t,i)=>`<div class="team-editor-row" data-team-editor-row data-team-id="${esc(t.id)}"><div class="team-number">${i+1}</div><label>Team name<input data-team-name value="${esc(t.name)}"></label><label class="team-code-field">Internal code<input data-team-code value="${esc(t.code||"TEAM"+(i+1))}"></label></div>`).join("")}</div><div class="actions" style="margin-top:14px"><button type="button" class="primary" onclick="saveTeams()">Save team list</button></div></div>
+
+    <div id="adminPlayersSection" class="card span-12 admin-section">
+      <div class="section-title"><div><div class="kicker">PLAYER MANAGER</div><h3>Add or edit player names</h3></div><span class="badge">${state.data.players.length} players</span></div>
+      <p class="muted">Open a team, edit any existing player name and save it, or add a new player to that team.</p>
+      <div class="admin-player-teams">${state.data.teams.map(t=>{
+        const ps=state.data.players.filter(p=>p.team_id===t.id);
+        return `<details class="admin-player-team">
+          <summary><span><strong>${esc(t.name)}</strong><small>${ps.length} players</small></span><span class="badge">${ps.length}</span></summary>
+          <div class="admin-player-list">
+            ${ps.map((p,i)=>`<div class="admin-player-row"><span class="roster-no">${i+1}</span><input data-admin-player-name="${esc(p.id)}" value="${esc(p.name)}" aria-label="Player name"><button type="button" class="secondary compact" onclick="editAdminPlayer('${esc(p.id)}')">Save</button></div>`).join("")||`<div class="muted">No players listed.</div>`}
+            <div class="admin-add-player"><input data-admin-new-player="${esc(t.id)}" placeholder="New player name" aria-label="New player name"><button type="button" class="primary" onclick="addAdminPlayer('${esc(t.id)}')">+ Add player</button></div>
+          </div>
+        </details>`;
+      }).join("")}</div>
+    </div>
 
     <div class="card span-6 admin-section"><h3>Post announcement</h3><form id="noticeForm" class="admin-grid"><label class="wide">Title<input id="noticeTitle" required></label><label class="wide">Message<textarea id="noticeBody" required></textarea></label><div class="wide"><button class="primary">Publish</button></div></form></div>
     <div class="card span-6 admin-section"><div class="restart-box"><div class="kicker">TESTING / RESTART</div><h3>Password-protected restart draw</h3><p class="muted">Clears the draw and every match score/result, but keeps your team names and tournament settings.</p><label>Admin password<input id="restartPassword" type="password" placeholder="Enter admin password"></label><label class="check-row"><input id="restartPlayers" type="checkbox"> Also clear registered test players</label><label class="check-row"><input id="restartNotices" type="checkbox"> Also clear announcements</label><div class="actions" style="margin-top:12px"><button type="button" class="danger" onclick="restartDraw()">Restart draw & clear results</button></div></div></div>
