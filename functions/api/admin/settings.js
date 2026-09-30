@@ -41,10 +41,10 @@ export async function onRequestPost(context) {
       const start=minutes(fresh.start_time);
       const slot=fresh.first_half+fresh.halftime+fresh.second_half+fresh.changeover;
       const sch={
-        M1:start,M2:start+slot,M3:start+2*slot,M4:start+3*slot,M5:start+4*slot,M6:start+5*slot,M7:start+6*slot,
-        QF1:start+7*slot,QF2:start+8*slot,QF3:start+9*slot,
-        SF1:start+10*slot,SF2:start+11*slot,
-        F:start+12*slot+fresh.final_recovery
+        M1:start,M2:start+slot,M3:start+2*slot,M4:start+3*slot,M5:start+4*slot,M6:start+5*slot,M7:start+6*slot,M8:start+7*slot,
+        QF1:start+8*slot,QF2:start+9*slot,QF3:start+10*slot,QF4:start+11*slot,
+        SF1:start+12*slot,SF2:start+13*slot,
+        F:start+14*slot+fresh.final_recovery
       };
       await DB.batch(Object.entries(sch).map(([no,min])=>
         DB.prepare("UPDATE matches SET match_date=?,start_time=? WHERE match_no=?").bind(fresh.date,hhmm(min),no)
