@@ -64,7 +64,8 @@ INSERT OR IGNORE INTO meta(key,value) VALUES
 ('config_changeover','5'),
 ('config_final_recovery','20'),
 ('config_max_squad','6'),
-('config_grace_minutes','3');
+('config_grace_minutes','3'),
+('config_arrival_minutes','5');
 
 INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t1','Bangladesh Tiger','BGT-731',1);
 INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t2','Thala Thalapathi','THT-482',2);
@@ -80,3 +81,5 @@ INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t11','Vihssaagendha
 INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t12','Team RMD Lions','RMD-792',12);
 INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t13','Team Inventory','INV-438',13);
 INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t14','Jehee Jehee','JHJ-186',14);
+INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t15','Kuda Adi','KDA-001',15);
+INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t16','Precast SC','PSC-001',16);
