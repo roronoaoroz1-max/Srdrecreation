@@ -70,6 +70,7 @@ export async function onRequestPost(context) {
     matches.push(["F","Final",null,null,"Winner SF1","Winner SF2",cfg.date,hhmm(f),"Court 1",15]);
 
     const statements=[
+      DB.prepare("DELETE FROM match_events"),
       DB.prepare("DELETE FROM matches"),
       DB.prepare("INSERT INTO meta(key,value) VALUES('draw_completed','1') ON CONFLICT(key) DO UPDATE SET value=excluded.value"),
       DB.prepare("DELETE FROM meta WHERE key IN ('bye_a','bye_b','round2_bye_source')"),
