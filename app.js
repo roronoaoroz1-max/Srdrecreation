@@ -168,6 +168,37 @@ function statusBadge(m){
   if(m.status==="Walkover")return `<span class="public-status">W/O</span>`;
   return `<span class="public-status">${esc(m.start_time||"Scheduled")}</span>`;
 }
+function matchEvents(no){
+  return (state.data?.events||[]).filter(e=>e.match_no===no);
+}
+function eventPlayerName(e){
+  return state.data?.players?.find(p=>p.id===e.player_id)?.name||"";
+}
+function eventTeamName(e){
+  return teamById(e.team_id)?.name||"";
+}
+function eventTime(e){
+  const m=Number(e.minute||0),s=Number(e.second||0);
+  return `${m}:${String(s).padStart(2,"0")}`;
+}
+function eventLabel(e){
+  const p=eventPlayerName(e);
+  if(e.event_type==="goal")return `⚽ Goal${p?" · "+p:""}`;
+  if(e.event_type==="penalty_goal")return `⚽ Penalty goal${p?" · "+p:""}`;
+  if(e.event_type==="penalty_miss")return `✕ Penalty missed${p?" · "+p:""}`;
+  if(e.event_type==="foul")return `⚠ Foul${p?" · "+p:""}`;
+  if(e.event_type==="yellow_card")return `🟨 Yellow card${p?" · "+p:""}`;
+  if(e.event_type==="red_card")return `🟥 Red card${p?" · "+p:""}`;
+  return e.event_type;
+}
+function matchFoulCount(no,teamId){
+  return matchEvents(no).filter(e=>e.event_type==="foul"&&e.team_id===teamId).length;
+}
+function playerOptionsForTeam(teamId){
+  const ps=(state.data.players||[]).filter(p=>p.team_id===teamId);
+  return `<option value="">Select player...</option>`+ps.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join("");
+}
+
 function renderPublicBoard(){
   const body=$("publicBoardBody");if(!body||!state.data)return;
   const ms=state.data.matches||[];
@@ -205,6 +236,9 @@ function renderPublicBoard(){
         <div class="team"><strong>${esc(a)}</strong></div>
       </div>
       <div class="public-feature-meta">${esc(current.match_date||"")} · ${esc(current.court||"Court 1")}${current.status==="Scheduled"?` · Kickoff ${esc(current.start_time)}`:""}</div>
+      ${matchEvents(current.match_no).length?`<div class="public-event-strip">
+        ${matchEvents(current.match_no).slice(-6).reverse().map(e=>`<div class="public-event-item"><b>${eventTime(e)}</b><span>${esc(eventTeamName(e))}</span><strong>${esc(eventLabel(e))}</strong>${e.detail?`<small>${esc(e.detail)}</small>`:""}</div>`).join("")}
+      </div>`:""}
     </div>`;
   }else{
     feature=`<div class="public-match public-feature-match"><div class="kicker">NEXT MATCH</div><h3>Tournament draw pending</h3><div class="notice">Match information will appear here as soon as the draw is applied.</div></div>`;
@@ -438,6 +472,40 @@ async function saveSettings(e){
   try{const out=await api("/api/admin/settings",{method:"POST",body:JSON.stringify(payload)});state.data=out.state;renderAll();renderPublicBoard();toast("Tournament settings saved.")}
   catch(e){toast(e.message)}
 }
+async function addMatchEvent(matchNo,eventType,teamId,side){
+  const minute=Number($(`officialMin_${matchNo}`)?.value||0);
+  const second=Number($(`officialSec_${matchNo}`)?.value||0);
+  const playerId=$(side==="home"?`officialHomePlayer_${matchNo}`:`officialAwayPlayer_${matchNo}`)?.value||"";
+
+  if(["goal","penalty_goal"].includes(eventType)&&!playerId){
+    return toast("Select the player who scored.");
+  }
+
+  try{
+    const out=await api("/api/admin/match-events",{method:"POST",body:JSON.stringify({
+      action:"add",match_no:matchNo,event_type:eventType,team_id:teamId,player_id:playerId,minute,second
+    })});
+    state.data=out.state;
+    renderAdmin();renderPublicBoard();
+    setTimeout(()=>scrollAdminSection("adminOfficialSection"),0);
+    if(out.penalty_awarded)toast("5th team foul reached — penalty awarded.");
+    else toast(eventType==="goal"||eventType==="penalty_goal"?"Goal recorded and score updated.":"Match event recorded.");
+  }catch(e){toast(e.message)}
+}
+window.addMatchEvent=addMatchEvent;
+
+async function undoMatchEvent(matchNo){
+  if(!confirm("Undo the latest recorded event for this match?"))return;
+  try{
+    const out=await api("/api/admin/match-events",{method:"POST",body:JSON.stringify({action:"undo",match_no:matchNo})});
+    state.data=out.state;
+    renderAdmin();renderPublicBoard();
+    setTimeout(()=>scrollAdminSection("adminOfficialSection"),0);
+    toast("Latest event undone.");
+  }catch(e){toast(e.message)}
+}
+window.undoMatchEvent=undoMatchEvent;
+
 async function saveLiveScore(no,status="Live"){
   const hs=Number($(`liveHome_${no}`).value),as=Number($(`liveAway_${no}`).value);
   try{const out=await api("/api/admin/live-score",{method:"POST",body:JSON.stringify({match_no:no,home_score:hs,away_score:as,status})});state.data=out.state;renderAll();renderPublicBoard();toast(status==="Live"?"Live score published.":"Match returned to scheduled.")}
@@ -509,6 +577,7 @@ function renderAdmin(){
   const sortedPlayable=[...playable].sort((a,b)=>(a.status==="Live"?-1:0)-(b.status==="Live"?-1:0)||a.sort_order-b.sort_order);
   $("adminPage").innerHTML=`<div class="admin-quick-nav">
       <button type="button" class="secondary" onclick="scrollAdminSection('adminLiveSection')">⚽ Live score</button>
+      <button type="button" class="secondary" onclick="scrollAdminSection('adminOfficialSection')">📝 Match official</button>
       <button type="button" class="secondary" onclick="scrollAdminSection('adminScheduleSection')">🕒 Match times</button>
       <button type="button" class="secondary" onclick="scrollAdminSection('adminDrawSection')">🎲 Draw</button>
       <button type="button" class="secondary" onclick="scrollAdminSection('adminSettingsSection')">⚙ Settings</button>
@@ -531,6 +600,65 @@ function renderAdmin(){
         </div>
         <div class="live-actions"><button type="button" class="primary" onclick="saveLiveScore('${m.match_no}','Live')">${m.status==="Live"?"Update LIVE score":"Start LIVE"}</button><button type="button" class="secondary" onclick="saveLiveScore('${m.match_no}','Scheduled')">Stop live</button><button type="button" class="secondary" onclick="enterResult('${m.match_no}')">Final result</button></div>
       </div>`}).join("")||`<div class="notice span-12">${state.data.draw.completed?"No playable matches are available yet. Finish the feeder match so the next teams advance.":"Run the draw first. Live score controls will appear here immediately."}</div>`}</div>
+    </div>
+
+    <div id="adminOfficialSection" class="card span-12 admin-section">
+      <div class="section-title"><div><div class="kicker">MATCH OFFICIAL</div><h3>Goals, scorers, time, fouls & cards</h3></div><span class="badge">5th foul = penalty</span></div>
+      <p class="muted">Use this during each match. Recording a goal automatically adds 1 to the live score. Record the match minute/second, scorer or player involved, fouls and cards. The 5th team foul is flagged as a penalty.</p>
+      <div class="official-match-grid">${sortedPlayable.map(m=>{
+        const {h,a}=pair(m);
+        const ev=matchEvents(m.match_no);
+        const hf=matchFoulCount(m.match_no,m.home_team_id),af=matchFoulCount(m.match_no,m.away_team_id);
+        return `<div class="official-match-card ${m.status==="Live"?"is-live":""}">
+          <div class="section-title">
+            <div><div class="kicker">${m.match_no} · ${esc(m.stage)} · ${esc(m.start_time)}</div><strong>${esc(h)} vs ${esc(a)}</strong></div>
+            <span class="badge ${m.status==="Live"?"live":""}">${esc(m.status)}</span>
+          </div>
+
+          <div class="official-score-summary">
+            <div><span>${esc(h)}</span><b>${m.home_score??0}</b><small class="${hf>=5?"foul-penalty":""}">Fouls: ${hf}${hf>=5?" · PENALTY":""}</small></div>
+            <div class="official-vs">VS</div>
+            <div><span>${esc(a)}</span><b>${m.away_score??0}</b><small class="${af>=5?"foul-penalty":""}">Fouls: ${af}${af>=5?" · PENALTY":""}</small></div>
+          </div>
+
+          <div class="official-clock-inputs">
+            <label>Minute<input id="officialMin_${m.match_no}" type="number" min="0" max="99" inputmode="numeric" value="0"></label>
+            <label>Second<input id="officialSec_${m.match_no}" type="number" min="0" max="59" inputmode="numeric" value="0"></label>
+          </div>
+
+          <div class="official-team-actions">
+            <div class="official-team-panel">
+              <strong>${esc(h)}</strong>
+              <select id="officialHomePlayer_${m.match_no}">${playerOptionsForTeam(m.home_team_id)}</select>
+              <div class="official-event-buttons">
+                <button type="button" class="primary" onclick="addMatchEvent('${m.match_no}','goal','${m.home_team_id}','home')">⚽ Goal</button>
+                <button type="button" class="secondary" onclick="addMatchEvent('${m.match_no}','foul','${m.home_team_id}','home')">⚠ Foul</button>
+                <button type="button" class="secondary" onclick="addMatchEvent('${m.match_no}','penalty_goal','${m.home_team_id}','home')">Penalty goal</button>
+                <button type="button" class="secondary" onclick="addMatchEvent('${m.match_no}','penalty_miss','${m.home_team_id}','home')">Penalty miss</button>
+                <button type="button" class="secondary" onclick="addMatchEvent('${m.match_no}','yellow_card','${m.home_team_id}','home')">🟨 Yellow</button>
+                <button type="button" class="danger" onclick="addMatchEvent('${m.match_no}','red_card','${m.home_team_id}','home')">🟥 Red</button>
+              </div>
+            </div>
+            <div class="official-team-panel">
+              <strong>${esc(a)}</strong>
+              <select id="officialAwayPlayer_${m.match_no}">${playerOptionsForTeam(m.away_team_id)}</select>
+              <div class="official-event-buttons">
+                <button type="button" class="primary" onclick="addMatchEvent('${m.match_no}','goal','${m.away_team_id}','away')">⚽ Goal</button>
+                <button type="button" class="secondary" onclick="addMatchEvent('${m.match_no}','foul','${m.away_team_id}','away')">⚠ Foul</button>
+                <button type="button" class="secondary" onclick="addMatchEvent('${m.match_no}','penalty_goal','${m.away_team_id}','away')">Penalty goal</button>
+                <button type="button" class="secondary" onclick="addMatchEvent('${m.match_no}','penalty_miss','${m.away_team_id}','away')">Penalty miss</button>
+                <button type="button" class="secondary" onclick="addMatchEvent('${m.match_no}','yellow_card','${m.away_team_id}','away')">🟨 Yellow</button>
+                <button type="button" class="danger" onclick="addMatchEvent('${m.match_no}','red_card','${m.away_team_id}','away')">🟥 Red</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="official-event-log">
+            <div class="section-title"><strong>Event log</strong><button type="button" class="ghost compact" onclick="undoMatchEvent('${m.match_no}')">Undo latest</button></div>
+            ${ev.length?ev.slice().reverse().map(e=>`<div class="official-event-row"><b>${eventTime(e)}</b><span>${esc(eventTeamName(e))}</span><strong>${esc(eventLabel(e))}</strong>${e.detail?`<small>${esc(e.detail)}</small>`:""}</div>`).join(""):`<div class="muted">No events recorded yet.</div>`}
+          </div>
+        </div>`;
+      }).join("")||`<div class="notice">No playable matches yet. Complete the draw or finish the previous feeder match.</div>`}</div>
     </div>
 
     <div id="adminScheduleSection" class="card span-12 admin-section"><div class="section-title"><div><div class="kicker">SCHEDULE CONTROL</div><h3>Adjust match times during the tournament</h3></div><span class="badge">±5 min quick shift</span></div>
