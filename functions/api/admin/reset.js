@@ -6,6 +6,7 @@ export async function onRequestPost(context) {
     await DB.batch([
       DB.prepare("DELETE FROM matches"),
       DB.prepare("DELETE FROM players"),
+      DB.prepare("DELETE FROM meta WHERE key='roster_version'"),
       DB.prepare("DELETE FROM announcements"),
       DB.prepare("INSERT INTO meta(key,value) VALUES('draw_completed','0') ON CONFLICT(key) DO UPDATE SET value=excluded.value"),
       DB.prepare("INSERT INTO meta(key,value) VALUES('draw_sequence','[]') ON CONFLICT(key) DO UPDATE SET value=excluded.value"),
