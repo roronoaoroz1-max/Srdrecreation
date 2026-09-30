@@ -20,8 +20,34 @@ async function api(path,opt={}){
   if(!r.ok) throw new Error(d.error||"Request failed");
   return d;
 }
+function renderPlayerTeamOptions(){
+  const select=$("playerDrawLetter");
+  if(!select||!state.data)return;
+
+  const current=select.value;
+  const sequence=Array.isArray(state.data.draw?.sequence)?state.data.draw.sequence:[];
+  if(!state.data.draw?.completed||!sequence.length){
+    select.innerHTML='<option value="">Teams available after official draw...</option>';
+    select.disabled=true;
+    return;
+  }
+
+  const rows=sequence
+    .filter(x=>x?.letter&&x?.team_name)
+    .map(x=>({letter:String(x.letter).toUpperCase(),team_name:String(x.team_name)}))
+    .sort((a,b)=>a.team_name.localeCompare(b.team_name));
+
+  select.disabled=false;
+  select.innerHTML='<option value="">Select your team...</option>'+rows
+    .map(x=>`<option value="${esc(x.letter)}">${esc(x.team_name)}</option>`)
+    .join("");
+
+  if(rows.some(x=>x.letter===current))select.value=current;
+}
+
 async function refresh(){
   state.data=await api(state.role==="admin"?"/api/admin/state":"/api/state");
+  renderPlayerTeamOptions();
   if(state.role){
     // Keep Admin forms stable during the 3.5-second background refresh.
     renderAll({skipAdmin: state.role==="admin" && state.currentPage==="admin"});
@@ -29,7 +55,7 @@ async function refresh(){
   renderPublicBoard();
 }
 async function refreshPublicOnly(){
-  try{state.data=await api("/api/state");renderPublicBoard()}
+  try{state.data=await api("/api/state");renderPlayerTeamOptions();renderPublicBoard()}
   catch(e){if($("publicBoardBody"))$("publicBoardBody").innerHTML=`<div class="notice">Live board unavailable: ${esc(e.message)}</div>`}
 }
 
