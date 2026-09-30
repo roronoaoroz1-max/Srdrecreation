@@ -431,3 +431,92 @@ body.projector-mode .public-small-item{
 body.projector-mode #publicRefreshBtn{
   min-width:110px;
 }
+
+
+/* V4.7: team-only login + clickable rosters */
+.public-teams-panel{
+  background:rgba(16,27,45,.94);
+  border:1px solid var(--line);
+  border-radius:24px;
+  box-shadow:var(--shadow);
+  padding:20px;
+}
+.public-teams-head h2{margin:3px 0 0}
+.public-teams-help{margin:8px 0 14px}
+.team-roster-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+.team-roster-card{
+  min-width:0;
+  border:1px solid var(--line);
+  background:#0c182a;
+  border-radius:14px;
+  overflow:hidden;
+}
+.team-roster-card summary{
+  list-style:none;
+  cursor:pointer;
+  min-height:62px;
+  padding:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  user-select:none;
+}
+.team-roster-card summary::-webkit-details-marker{display:none}
+.team-roster-card summary::after{
+  content:"＋";
+  color:var(--accent);
+  font-size:20px;
+  flex:0 0 auto;
+}
+.team-roster-card[open] summary::after{content:"−"}
+.team-roster-card[open] summary{
+  background:#111f34;
+  border-bottom:1px solid var(--line);
+}
+.team-roster-title{
+  display:grid;
+  gap:3px;
+  min-width:0;
+}
+.team-roster-title strong{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.team-roster-title small{color:var(--muted)}
+.team-roster-card summary .badge{margin-left:auto;white-space:nowrap}
+.team-roster-players{padding:8px 12px 12px}
+.roster-player{
+  display:grid;
+  grid-template-columns:28px minmax(0,1fr);
+  gap:8px;
+  align-items:center;
+  padding:7px 0;
+  border-bottom:1px solid #1d2d47;
+}
+.roster-player:last-child{border-bottom:0}
+.roster-no{
+  width:24px;height:24px;border-radius:50%;
+  display:grid;place-items:center;
+  background:#172a43;color:var(--muted);font-size:11px;font-weight:800;
+}
+#playerLogin{max-width:520px}
+#playerLogin .primary{width:100%}
+
+@media(max-width:560px){
+  .public-teams-panel{padding:12px;border-radius:16px}
+  .team-roster-grid{grid-template-columns:1fr}
+  .team-roster-card summary{min-height:58px;padding:11px}
+}
+@media(min-width:561px) and (max-width:1024px){
+  .team-roster-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(min-width:1025px) and (max-width:1280px){
+  .team-roster-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+body.projector-mode .public-teams-panel{display:none!important}
