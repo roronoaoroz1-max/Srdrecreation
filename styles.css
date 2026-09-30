@@ -573,3 +573,25 @@ body.projector-mode .public-teams-panel{display:none!important}
   .admin-add-player{grid-template-columns:1fr}
   .admin-add-player button{width:100%}
 }
+
+
+/* V4.8.1: Safe score-only test reset */
+.test-score-reset{
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  align-items:center;
+  margin:12px 0 16px;
+  padding:13px 14px;
+  border:1px solid #315b70;
+  background:#0d2937;
+  border-radius:14px;
+}
+.test-score-reset>div{min-width:0}
+.test-score-reset strong{display:block;margin:2px 0 3px}
+.test-score-reset .muted{font-size:13px;line-height:1.45}
+.test-score-reset button{flex:0 0 auto;white-space:nowrap}
+@media(max-width:700px){
+  .test-score-reset{display:grid;grid-template-columns:1fr}
+  .test-score-reset button{width:100%;white-space:normal}
+}
