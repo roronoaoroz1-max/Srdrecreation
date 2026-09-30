@@ -17,8 +17,8 @@ export async function onRequestPost(context) {
     const drawTeams=teams.filter(t=>t.id!=="t9"&&t.id!=="t15");
     if(drawTeams.length!==14) return json({error:"Exactly 14 teams are required in the A–N draw pool"},400);
 
-    const letters=["A","B","C","D","E","F","G","H","I","J","K","L","M","N"];
-    const assignedTeams=shuffle(drawTeams);
+    const letters=["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"];
+    const assignedTeams=[...shuffle(drawTeams),kudaAdi,wantedCow];
     const byLetter={};
     const sequence=[];
 
@@ -54,7 +54,7 @@ export async function onRequestPost(context) {
         null,null,cfg.date,hhmm(start+i*slot),"Court 1",i+1
       ]);
     });
-    matches.push(["M8","Round 1",kudaAdi.id,wantedCow.id,null,null,cfg.date,hhmm(start+7*slot),"Court 1",8]);
+    matches.push(["M8","Round 1",byLetter.O.id,byLetter.P.id,null,null,cfg.date,hhmm(start+7*slot),"Court 1",8]);
 
     const q=start+8*slot;
     matches.push(["QF1","Quarterfinal",null,null,"Winner M1","Winner M2",cfg.date,hhmm(q),"Court 1",9]);
@@ -98,7 +98,8 @@ function matchSlot(letter){
     H:"M7 · Team 1",
     I:"M4 · Team 1", J:"M4 · Team 2",
     K:"M5 · Team 1", L:"M5 · Team 2",
-    M:"M6 · Team 1", N:"M6 · Team 2"
+    M:"M6 · Team 1", N:"M6 · Team 2",
+    O:"M8 · Team 1", P:"M8 · Team 2"
   };
   return map[letter] || "";
 }
