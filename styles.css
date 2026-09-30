@@ -630,3 +630,39 @@ body.projector-mode .public-teams-panel{display:none!important}
   .official-event-row small,.public-event-item small{grid-column:2}
 }
 body.projector-mode .public-event-item{font-size:16px}
+
+
+/* V4.9.1: Match official stopwatch */
+.official-stopwatch{
+  display:grid;
+  gap:10px;
+  margin:12px 0;
+  padding:14px;
+  border:1px solid #315b70;
+  background:#091b2d;
+  border-radius:14px;
+}
+.official-stopwatch-display{
+  text-align:center;
+  font-size:clamp(38px,5vw,58px);
+  line-height:1;
+  font-weight:1000;
+  letter-spacing:.05em;
+  font-variant-numeric:tabular-nums;
+  color:#d7fbff;
+}
+.official-stopwatch-actions{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:7px;
+}
+.official-stopwatch-actions button{min-width:0}
+.official-stopwatch-note{
+  text-align:center;
+  font-size:12px;
+  line-height:1.4;
+}
+@media(max-width:620px){
+  .official-stopwatch-actions{grid-template-columns:1fr 1fr}
+  .official-stopwatch-display{font-size:44px}
+}
