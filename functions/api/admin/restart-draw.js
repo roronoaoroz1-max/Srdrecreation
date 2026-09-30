@@ -9,6 +9,7 @@ export async function onRequestPost(context){
     if(String(d.password||"")!==expected) return json({error:"Incorrect admin password"},401);
 
     const q=[
+      DB.prepare("DELETE FROM match_events"),
       DB.prepare("DELETE FROM matches"),
       DB.prepare("INSERT INTO meta(key,value) VALUES('draw_completed','0') ON CONFLICT(key) DO UPDATE SET value=excluded.value"),
       DB.prepare("INSERT INTO meta(key,value) VALUES('draw_sequence','[]') ON CONFLICT(key) DO UPDATE SET value=excluded.value"),
