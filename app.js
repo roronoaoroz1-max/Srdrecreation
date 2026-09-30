@@ -62,9 +62,20 @@ $("adminLogin").addEventListener("submit",async e=>{
 $("logoutBtn").addEventListener("click",()=>{
   clearInterval(state.timer);state.role=null;state.player=null;state.adminToken="";
   localStorage.removeItem("futsal_player");sessionStorage.removeItem("futsal_admin_token");
-  $("appView").classList.add("hidden");$("loginView").classList.remove("hidden");refreshPublicOnly();
+  $("appView").classList.add("hidden");$("loginView").classList.remove("hidden");setPublicLogin(false);refreshPublicOnly();
 });
 $("publicRefreshBtn")?.addEventListener("click",refreshPublicOnly);
+function setPublicLogin(open){
+  const card=$("loginCard");
+  const show=$("showLoginBtn");
+  if(!card||!show)return;
+  card.classList.toggle("hidden",!open);
+  show.setAttribute("aria-expanded",open?"true":"false");
+  show.textContent=open?"Login open":"Open login";
+  if(open) card.scrollIntoView({behavior:"smooth",block:"start"});
+}
+$("showLoginBtn")?.addEventListener("click",()=>setPublicLogin($("loginCard")?.classList.contains("hidden")));
+$("hideLoginBtn")?.addEventListener("click",()=>setPublicLogin(false));
 document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
 
 async function enterApp(){
@@ -100,32 +111,53 @@ function statusBadge(m){
 }
 function renderPublicBoard(){
   const body=$("publicBoardBody");if(!body||!state.data)return;
-  const ms=state.data.matches||[],live=ms.filter(m=>m.status==="Live");
-  const upcoming=ms.filter(m=>m.status==="Scheduled"&&m.home_team_id&&m.away_team_id).slice(0,4);
+  const ms=state.data.matches||[];
+  const live=ms.find(m=>m.status==="Live");
+  const upcoming=ms.filter(m=>m.status==="Scheduled"&&m.home_team_id&&m.away_team_id);
   const finished=ms.filter(m=>["Finished","Walkover"].includes(m.status)).slice(-4).reverse();
-  const current=live[0]||upcoming[0]||finished[0];
-  if(!current){
-    body.innerHTML=`<div class="notice"><strong>${state.data.draw.completed?"Draw completed.":"Tournament draw not completed yet."}</strong><br>Live score, latest results and upcoming matches will appear here without login.</div>`;return;
-  }
-  const{h,a}=pair(current);
-  const score=current.status==="Scheduled"?current.start_time:`${current.home_score??0} - ${current.away_score??0}`;
-  body.innerHTML=`<div class="public-live-grid">
-    <div class="public-match"><div class="section-title"><div><div class="kicker">${esc(current.match_no)} · ${esc(current.stage)}</div><strong>${current.status==="Live"?"Current match":current.status==="Scheduled"?"Next match":"Latest result"}</strong></div>${statusBadge(current)}</div>
-      <div class="public-scoreline"><div class="team"><strong>${esc(h)}</strong></div><div class="public-score">${score}</div><div class="team"><strong>${esc(a)}</strong></div></div>
-      <div class="muted" style="text-align:center;margin-top:8px">${esc(current.match_date||"")} · ${esc(current.court||"Court 1")}</div>
-    </div>
-    <div class="public-match"><div class="kicker">TOURNAMENT INFO</div><div class="public-small-list">
+  const current=live||upcoming[0]||finished[0]||null;
+
+  const info=`<div class="public-match public-info-panel">
+    <div class="kicker">TOURNAMENT INFO</div>
+    <div class="public-small-list">
       <div class="public-small-item"><span>Venue</span><strong>${esc(state.data.config.venue)}</strong></div>
       <div class="public-small-item"><span>Date</span><strong>${esc(state.data.config.date)}</strong></div>
       <div class="public-small-item"><span>Start</span><strong>${esc(state.data.config.start_time)}</strong></div>
+      <div class="public-small-item"><span>Teams</span><strong>16</strong></div>
       <div class="public-small-item"><span>Draw</span><strong>${state.data.draw.completed?"Completed":"Pending"}</strong></div>
-    </div></div></div>
-    <div class="grid" style="margin-top:14px">
-      <div class="card span-6" style="box-shadow:none"><h3>Recent results</h3>${finished.length?finished.map(fixture).join(""):`<p class="muted">No results yet.</p>`}</div>
-      <div class="card span-6" style="box-shadow:none"><h3>Upcoming</h3>${upcoming.length?upcoming.map(fixture).join(""):`<p class="muted">No upcoming matches assigned.</p>`}</div>
+    </div>
+  </div>`;
+
+  let feature;
+  if(current){
+    const{h,a}=pair(current);
+    const score=current.status==="Scheduled"
+      ? `<span class="next-kickoff">${esc(current.start_time)}</span>`
+      : `${current.home_score??0} - ${current.away_score??0}`;
+    const title=current.status==="Live"?"LIVE NOW":current.status==="Scheduled"?"NEXT MATCH":"LATEST RESULT";
+    feature=`<div class="public-match public-feature-match">
+      <div class="section-title">
+        <div><div class="kicker">${esc(current.match_no)} · ${esc(current.stage)}</div><h3>${title}</h3></div>
+        ${statusBadge(current)}
+      </div>
+      <div class="public-scoreline public-scoreline-feature">
+        <div class="team"><strong>${esc(h)}</strong></div>
+        <div class="public-score">${score}</div>
+        <div class="team"><strong>${esc(a)}</strong></div>
+      </div>
+      <div class="public-feature-meta">${esc(current.match_date||"")} · ${esc(current.court||"Court 1")}${current.status==="Scheduled"?` · Kickoff ${esc(current.start_time)}`:""}</div>
+    </div>`;
+  }else{
+    feature=`<div class="public-match public-feature-match"><div class="kicker">NEXT MATCH</div><h3>Tournament draw pending</h3><div class="notice">Match information will appear here as soon as the draw is applied.</div></div>`;
+  }
+
+  body.innerHTML=`${feature}
+    <div class="public-details-grid">
+      ${info}
+      <div class="public-match"><div class="section-title"><h3>Upcoming</h3><span class="badge">${upcoming.length}</span></div>${upcoming.slice(live?0:1,live?4:5).map(fixture).join("")||`<p class="muted">No other upcoming matches assigned.</p>`}</div>
+      <div class="public-match"><div class="section-title"><h3>Recent results</h3><span class="badge">${finished.length}</span></div>${finished.length?finished.map(fixture).join(""):`<p class="muted">No results yet.</p>`}</div>
     </div>`;
 }
-
 const myTeam=()=>state.role==="player"?state.player?.team_id:null;
 const myMatches=()=>{const t=myTeam();return t?state.data.matches.filter(m=>m.home_team_id===t||m.away_team_id===t):[]};
 const nextMatch=()=>myMatches().find(m=>!["Finished","Walkover"].includes(m.status));
@@ -155,7 +187,7 @@ function renderHome(){
   </div>`;
 }
 function renderDraw(){
-  const d=state.data.draw;$("drawPage").innerHTML=`<div class="card"><div class="section-title"><div><div class="kicker">OFFICIAL LETTER DRAW</div><h3>Draw results A–N</h3></div><span class="badge ${d.completed?"ok":""}">${d.completed?"Completed":"Waiting"}</span></div>${!d.completed?`<div class="notice">The organizer has not run the draw yet. Player login by letter becomes available after the draw.</div>`:`<div class="draw-history">${d.sequence.map(x=>`<div class="draw-item"><span class="kicker">LETTER ${esc(x.letter)} · ${esc(x.slot)}</span><strong>${esc(x.team_name)}</strong></div>`).join("")}</div>`}</div>`;
+  const d=state.data.draw;$("drawPage").innerHTML=`<div class="card"><div class="section-title"><div><div class="kicker">OFFICIAL LETTER DRAW</div><h3>Draw results A–P</h3></div><span class="badge ${d.completed?"ok":""}">${d.completed?"Completed":"Waiting"}</span></div>${!d.completed?`<div class="notice">The organizer has not run the draw yet. Player login by letter becomes available after the draw.</div>`:`<div class="draw-history">${d.sequence.map(x=>`<div class="draw-item"><span class="kicker">LETTER ${esc(x.letter)} · ${esc(x.slot)}</span><strong>${esc(x.team_name)}</strong></div>`).join("")}</div>`}</div>`;
 }
 function bracketCard(m){
   if(!m)return `<div class="match-card"><div class="match-meta"><span>TBD</span><span>Pending</span></div><div class="match-team"><span>TBD</span><b>—</b></div><div class="match-team"><span>TBD</span><b>—</b></div></div>`;
@@ -164,7 +196,12 @@ function bracketCard(m){
 }
 function renderBracket(){
   const s=x=>state.data.matches.filter(m=>m.stage===x),r=s("Round 1"),q=s("Quarterfinal"),sf=s("Semifinal"),f=s("Final");
-  $("bracketPage").innerHTML=`<div class="card"><div class="section-title"><h3>Knockout bracket</h3><span class="badge">${state.data.draw.completed?"Live":"Awaiting draw"}</span></div><div class="bracket-wrap"><div class="bracket"><div><div class="round-title">Round 1</div><div class="round">${Array.from({length:8},(_,i)=>bracketCard(r[i])).join("")}</div></div><div><div class="round-title">Quarterfinals</div><div class="round qf">${Array.from({length:4},(_,i)=>bracketCard(q[i])).join("")}</div></div><div><div class="round-title">Semifinals</div><div class="round sf">${Array.from({length:2},(_,i)=>bracketCard(sf[i])).join("")}</div></div><div><div class="round-title">Final</div><div class="round final">${bracketCard(f[0])}</div></div></div></div></div>`;
+  $("bracketPage").innerHTML=`<div class="card bracket-card"><div class="section-title"><h3>Knockout bracket</h3><span class="badge">${state.data.draw.completed?"Live":"Awaiting draw"}</span></div><div class="bracket-wrap"><div class="bracket">
+    <div class="bracket-column"><div class="round-title">Round 1</div><div class="round r1">${Array.from({length:8},(_,i)=>bracketCard(r[i])).join("")}</div></div>
+    <div class="bracket-column"><div class="round-title">Quarterfinals</div><div class="round qf">${Array.from({length:4},(_,i)=>bracketCard(q[i])).join("")}</div></div>
+    <div class="bracket-column"><div class="round-title">Semifinals</div><div class="round sf">${Array.from({length:2},(_,i)=>bracketCard(sf[i])).join("")}</div></div>
+    <div class="bracket-column"><div class="round-title">Final</div><div class="round final">${bracketCard(f[0])}</div></div>
+  </div></div></div>`;
 }
 function renderMatches(){
   const stages=["Round 1","Quarterfinal","Semifinal","Final"];
@@ -187,7 +224,7 @@ function renderGuide(){
   ];
   $("guidePage").innerHTML=`<div class="card"><div class="kicker">ONE-PAGE TOURNAMENT GUIDE</div><h3>How the tournament works</h3><p class="muted">16 teams play single elimination using draw letters A–P. M8 uses letters O and P.</p><div class="notice"><b>M1:</b> B vs C · <b>M2:</b> D vs E · <b>M3:</b> F vs G · <b>M4:</b> I vs J<br><b>M5:</b> K vs L · <b>M6:</b> M vs N · <b>M7:</b> H vs A · <b>M8:</b> O vs P<br><br><b>QF1:</b> Winner M1 vs Winner M2<br><b>QF2:</b> Winner M3 vs Winner M4<br><b>QF3:</b> Winner M5 vs Winner M6<br><b>QF4:</b> Winner M7 vs Winner M8<br><br><b>SF1:</b> Winner QF1 vs Winner QF2<br><b>SF2:</b> Winner QF3 vs Winner QF4<br>Then Final.</div></div>
   <div class="card"><div class="section-title"><h3>Letter positions</h3><span class="badge">A–P</span></div><div class="table-wrap"><table><thead><tr><th>Letter</th><th>Position</th></tr></thead><tbody>${rows.map(([a,b])=>`<tr><td><b>${a}</b></td><td>${b}</td></tr>`).join("")}<tr><td><b>KDA</b></td><td>M8 · Kuda Adi</td></tr><tr><td><b>WTC</b></td><td>M8 · Wanted Cow</td></tr></tbody></table></div></div>
-  <div class="card"><h3>Timing & login</h3><div class="rule-grid"><div class="rule"><strong>${c.first_half}+${c.halftime}+${c.second_half} min</strong><span class="muted">First half + halftime + second half</span></div><div class="rule"><strong>${c.changeover} min</strong><span class="muted">Changeover</span></div><div class="rule"><strong>Arrive ${c.arrival_minutes??5} min early</strong><span class="muted">Players see a “be at stadium by” time for every upcoming team match.</span></div><div class="rule"><strong>Public live board</strong><span class="muted">Scores can be viewed before login.</span></div><div class="rule"><strong>Player login</strong><span class="muted">Draw teams use A–N. Kuda Adi uses KDA and Wanted Cow uses WTC.</span></div></div></div>`;
+  <div class="card"><h3>Timing & login</h3><div class="rule-grid"><div class="rule"><strong>${c.first_half}+${c.halftime}+${c.second_half} min</strong><span class="muted">First half + halftime + second half</span></div><div class="rule"><strong>${c.changeover} min</strong><span class="muted">Changeover</span></div><div class="rule"><strong>Arrive ${c.arrival_minutes??5} min early</strong><span class="muted">Players see a “be at stadium by” time for every upcoming team match.</span></div><div class="rule"><strong>Public live board</strong><span class="muted">Scores can be viewed before login.</span></div><div class="rule"><strong>Player login</strong><span class="muted">Players use their assigned draw letter A–P.</span></div></div></div>`;
 }
 function renderRules(){
   const c=state.data.config,r=[["Players",`3 on court. Maximum squad ${c.max_squad}.`],["Match time",`${c.first_half} min first half, ${c.halftime} min halftime, ${c.second_half} min second half.`],["Substitutions","Unlimited rolling substitutions."],["Offside","No offside."],["Restart","Kick-ins instead of throw-ins."],["Sliding tackles","Not allowed."],["Drawn match","No extra time. 3 penalties each, then sudden death."],["Late team",`${c.grace_minutes}-minute grace period, then organizer may award a 3-0 walkover.`],["Cards","Second yellow = red. Serious misconduct may lead to removal."],["Referee","Referee decisions during play are final."]];
