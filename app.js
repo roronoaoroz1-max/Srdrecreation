@@ -234,7 +234,30 @@ function manualDrawSlots(){
     {letter:"O",label:"M8 Team 1"},{letter:"P",label:"M8 Team 2"}
   ];
 }
-function currentTeamForLetter(letter){return state.data.draw?.sequence?.find(x=>x.letter===letter)?.team_id||""}
+const presetManualDrawByLetter={
+  A:"Boot Hoist",
+  B:"Gina Vaahaka",
+  C:"Team Inventory",
+  D:"Everest",
+  E:"Bangladesh Tiger",
+  F:"Emme Baaru",
+  G:"Short Circuit FC",
+  H:"Precast SC",
+  I:"150 Bar",
+  J:"Vihssaagendhaa Current",
+  K:"Team RMD Lions",
+  L:"Thala Thalapathi",
+  M:"Team Korakali",
+  N:"Jehee Jehee",
+  O:"Wanted Cow",
+  P:"Kuda Adi"
+};
+function currentTeamForLetter(letter){
+  const existing=state.data.draw?.sequence?.find(x=>x.letter===letter)?.team_id;
+  if(existing)return existing;
+  const wantedName=presetManualDrawByLetter[letter];
+  return state.data.teams.find(t=>t.name===wantedName)?.id||"";
+}
 function teamOptions(selected=""){return `<option value="">Select team...</option>`+state.data.teams.map(t=>`<option value="${esc(t.id)}" ${selected===t.id?"selected":""}>${esc(t.name)}</option>`).join("")}
 function setAdminDrawMode(mode){
   state.adminDrawMode=mode;
@@ -371,7 +394,7 @@ function renderAdmin(){
     <div id="adminDrawSection" class="card span-12 admin-section"><div class="section-title"><div><div class="kicker">DRAW CONTROL</div><h3>Automatic or manual letter draw</h3></div><span class="badge ${state.data.draw.completed?"ok":""}">${state.data.draw.completed?"Draw exists":"Ready"}</span></div>
       <div class="draw-choice-tabs"><button type="button" class="secondary ${state.adminDrawMode==="auto"?"active":""}" data-draw-mode="auto" onclick="setAdminDrawMode('auto')">Automatic animated draw</button><button type="button" class="secondary ${state.adminDrawMode==="manual"?"active":""}" data-draw-mode="manual" onclick="setAdminDrawMode('manual')">Manual / edit draw</button></div>
       <div id="autoDrawSection" class="${state.adminDrawMode==="auto"?"":"hidden"}"><p class="muted">Draw uses letters A–P. O and P are the M8 positions; automatic draw keeps Kuda Adi vs Wanted Cow there, while manual draw lets Admin edit all 16 letters.</p><div class="actions"><button id="startDrawBtn" type="button" class="primary">${state.data.draw.completed?"Run another automatic draw":"Start animated draw"}</button>${state.data.draw.completed?`<button type="button" class="secondary" onclick="setAdminDrawMode('manual')">Edit current draw manually</button>`:""}<button type="button" class="secondary" onclick="showPage('draw')">View current draw</button></div></div>
-      <div id="manualDrawSection" class="${state.adminDrawMode==="manual"?"":"hidden"}"><div class="notice manual-stable-note"><b>Manual editor stays open while you work.</b><br>After an automatic draw, current assignments are pre-selected. Change only what you need, then apply.</div>
+      <div id="manualDrawSection" class="${state.adminDrawMode==="manual"?"":"hidden"}"><div class="notice manual-stable-note"><b>Assigned letters are pre-filled automatically.</b><br>A–P are loaded with the approved team-letter assignments. Change only what you need, then apply the manual draw.</div>
         <div class="manual-draw-grid">${slots.map(slot=>{const selected=state.manualDrawDraft?.[slot.letter]??currentTeamForLetter(slot.letter);return `<div class="manual-slot"><div class="kicker">LETTER ${slot.letter} · ${slot.label}</div><select data-manual-slot="${slot.letter}">${teamOptions(selected)}</select></div>`}).join("")}</div>
         <div class="actions" style="margin-top:14px"><button type="button" class="primary" onclick="submitManualDraw()">Apply manual letter draw</button></div>
       </div>
