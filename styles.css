@@ -258,3 +258,29 @@ table{width:100%;border-collapse:collapse;min-width:760px}th,td{padding:10px;bor
   .public-scoreline-feature .team strong{font-size:15px}
   .public-scoreline-feature .public-score{font-size:30px;min-width:70px}
 }
+
+
+/* V4.5.1: prevent M7/M8 from being clipped and keep 8→4→2→1 centered */
+.bracket-card{overflow:visible}
+.bracket-wrap{
+  overflow-x:auto;
+  overflow-y:visible;
+  padding:4px 2px 22px;
+}
+.bracket{min-height:912px}
+.round.r1,
+.round.qf,
+.round.sf,
+.round.final{
+  height:auto;
+  min-height:880px;
+  grid-template-rows:repeat(8,110px);
+  padding-top:0;
+  gap:0;
+}
+.round.r1 .match-card,
+.round.qf .match-card,
+.round.sf .match-card,
+.round.final .match-card{
+  align-self:center;
+}
