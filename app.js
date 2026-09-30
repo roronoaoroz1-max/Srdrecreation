@@ -24,33 +24,47 @@ async function api(path,opt={}){
   return d;
 }
 function renderPlayerTeamOptions(){
-  const select=$("playerDrawLetter");
+  const select=$("playerTeam");
   if(!select||!state.data)return;
-
   const current=select.value;
-  const sequence=Array.isArray(state.data.draw?.sequence)?state.data.draw.sequence:[];
-  if(!state.data.draw?.completed||!sequence.length){
-    select.innerHTML='<option value="">Teams available after official draw...</option>';
+  const teams=[...(state.data.teams||[])].sort((a,b)=>a.name.localeCompare(b.name));
+
+  if(!teams.length){
+    select.innerHTML='<option value="">No teams available</option>';
     select.disabled=true;
     return;
   }
 
-  const rows=sequence
-    .filter(x=>x?.letter&&x?.team_name)
-    .map(x=>({letter:String(x.letter).toUpperCase(),team_name:String(x.team_name)}))
-    .sort((a,b)=>a.team_name.localeCompare(b.team_name));
-
   select.disabled=false;
-  select.innerHTML='<option value="">Select your team...</option>'+rows
-    .map(x=>`<option value="${esc(x.letter)}">${esc(x.team_name)}</option>`)
+  select.innerHTML='<option value="">Select your team...</option>'+teams
+    .map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`)
     .join("");
-
-  if(rows.some(x=>x.letter===current))select.value=current;
+  if(teams.some(t=>t.id===current))select.value=current;
 }
 
+function teamRosterDetails(t,open=false){
+  const ps=(state.data.players||[]).filter(p=>p.team_id===t.id);
+  const letter=teamDrawLetter(t.id);
+  return `<details class="team-roster-card" ${open?"open":""}>
+    <summary>
+      <span class="team-roster-title"><strong>${esc(t.name)}</strong><small>${letter!=="—"?"Letter "+esc(letter):"Team roster"}</small></span>
+      <span class="badge">${ps.length} players</span>
+    </summary>
+    <div class="team-roster-players">${ps.length?ps.map((p,i)=>`<div class="roster-player"><span class="roster-no">${i+1}</span><span>${esc(p.name)}</span></div>`).join(""):`<div class="muted">No players listed.</div>`}</div>
+  </details>`;
+}
+
+function renderPublicTeams(){
+  const panel=$("publicTeamsPanel");
+  if(!panel||!state.data)return;
+  panel.innerHTML=`<div class="section-title public-teams-head"><div><div class="eyebrow">TEAMS & PLAYERS</div><h2>Team Rosters</h2></div><span class="badge">${state.data.teams.length} teams</span></div>
+    <p class="muted public-teams-help">Tap or click a team to see its players.</p>
+    <div class="team-roster-grid">${state.data.teams.map(t=>teamRosterDetails(t)).join("")}</div>`;
+}
 async function refresh(){
   state.data=await api(state.role==="admin"?"/api/admin/state":"/api/state");
   renderPlayerTeamOptions();
+  renderPublicTeams();
   if(state.role){
     // Keep Admin forms stable during the 3.5-second background refresh.
     renderAll({skipAdmin: state.role==="admin" && state.currentPage==="admin"});
@@ -58,7 +72,7 @@ async function refresh(){
   renderPublicBoard();
 }
 async function refreshPublicOnly(){
-  try{state.data=await api("/api/state");renderPlayerTeamOptions();renderPublicBoard()}
+  try{state.data=await api("/api/state");renderPlayerTeamOptions();renderPublicTeams();renderPublicBoard()}
   catch(e){if($("publicBoardBody"))$("publicBoardBody").innerHTML=`<div class="notice">Live board unavailable: ${esc(e.message)}</div>`}
 }
 
@@ -71,8 +85,7 @@ $("playerLogin").addEventListener("submit",async e=>{
   e.preventDefault();
   try{
     const out=await api("/api/player/login",{method:"POST",body:JSON.stringify({
-      name:$("playerName").value.trim(),draw_letter:$("playerDrawLetter").value,
-      shirt_no:$("playerShirt").value.trim(),position:$("playerPosition").value
+      team_id:$("playerTeam").value
     })});
     state.role="player";state.player={...out.player,draw_letter:out.draw_letter};
     localStorage.setItem("futsal_player",JSON.stringify(state.player));await enterApp();
@@ -120,7 +133,7 @@ document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",(
 async function enterApp(){
   await refresh();$("loginView").classList.add("hidden");$("appView").classList.remove("hidden");
   $("adminNav").classList.toggle("hidden",state.role!=="admin");
-  $("userBadge").textContent=state.role==="admin"?"Tournament Admin":`${state.player?.name||"Player"} · ${teamById(state.player?.team_id)?.name||""}`;
+  $("userBadge").textContent=state.role==="admin"?"Tournament Admin":`Team: ${teamById(state.player?.team_id)?.name||state.player?.name||""}`;
   showPage("home");clearInterval(state.timer);
   state.timer=setInterval(()=>{
     if(state.drawAnimating) return;
@@ -248,10 +261,14 @@ function renderMatches(){
 }
 function renderTeam(){
   if(state.role!=="player"){
-    $("teamPage").innerHTML=`<div class="card"><h3>Registered players</h3>${state.data.teams.map(t=>{const ps=state.data.players.filter(p=>p.team_id===t.id);return `<div class="row"><div><strong>${esc(t.name)}</strong><div class="muted">${ps.map(p=>esc(p.name)).join(", ")||"No players registered"}</div></div><span class="badge">${ps.length}/${state.data.config.max_squad}</span></div>`}).join("")}</div>`;return;
+    $("teamPage").innerHTML=`<div class="card"><div class="section-title"><div><div class="kicker">TEAM ROSTERS</div><h3>Teams & players</h3></div><span class="badge">${state.data.teams.length} teams</span></div><p class="muted">Tap or click a team to show its players.</p><div class="team-roster-grid">${state.data.teams.map(t=>teamRosterDetails(t)).join("")}</div></div>`;return;
   }
-  const t=teamById(state.player.team_id),ps=state.data.players.filter(p=>p.team_id===state.player.team_id);
-  $("teamPage").innerHTML=`<div class="grid"><div class="card span-5"><div class="kicker">MY TEAM · LETTER ${esc(teamDrawLetter(state.player.team_id))}</div><h3>${esc(t?.name)}</h3>${ps.map(p=>`<div class="row"><div class="person"><div class="avatar">${esc(initials(p.name))}</div><div><strong>${esc(p.name)}</strong><div class="muted">${esc(p.position||"Player")}</div></div></div><b>#${esc(p.shirt_no||"—")}</b></div>`).join("")}</div><div class="card span-7"><h3>Team matches</h3>${myMatches().length?myMatches().map(m=>`<div class="player-match-block">${arrivalNote(m)}${fixture(m)}</div>`).join(""):`<p class="muted">Matches appear after the draw.</p>`}</div></div>`;
+
+  const t=teamById(state.player.team_id);
+  $("teamPage").innerHTML=`<div class="grid">
+    <div class="card span-5"><div class="kicker">MY TEAM · LETTER ${esc(teamDrawLetter(state.player.team_id))}</div><h3>${esc(t?.name||"Team")}</h3>${t?teamRosterDetails(t,true):""}</div>
+    <div class="card span-7"><h3>Team matches</h3>${myMatches().length?myMatches().map(m=>`<div class="player-match-block">${arrivalNote(m)}${fixture(m)}</div>`).join(""):`<p class="muted">Matches appear after the draw.</p>`}</div>
+  </div>`;
 }
 function renderGuide(){
   const c=state.data.config,rows=[
