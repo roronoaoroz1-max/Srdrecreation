@@ -520,3 +520,56 @@ body.projector-mode #publicRefreshBtn{
   .team-roster-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 body.projector-mode .public-teams-panel{display:none!important}
+
+
+/* V4.8: Admin player manager */
+.admin-player-teams{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin-top:12px;
+}
+.admin-player-team{
+  min-width:0;
+  border:1px solid var(--line);
+  background:#0c182a;
+  border-radius:14px;
+  overflow:hidden;
+}
+.admin-player-team summary{
+  list-style:none;
+  cursor:pointer;
+  min-height:58px;
+  padding:12px 14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+.admin-player-team summary::-webkit-details-marker{display:none}
+.admin-player-team summary>span:first-child{display:grid;gap:3px;min-width:0}
+.admin-player-team summary small{color:var(--muted)}
+.admin-player-team[open] summary{background:#111f34;border-bottom:1px solid var(--line)}
+.admin-player-list{display:grid;gap:8px;padding:12px}
+.admin-player-row{
+  display:grid;
+  grid-template-columns:30px minmax(0,1fr) auto;
+  gap:8px;
+  align-items:center;
+}
+.admin-player-row input{min-width:0}
+.admin-add-player{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:8px;
+  padding-top:10px;
+  margin-top:4px;
+  border-top:1px solid var(--line);
+}
+@media(max-width:760px){
+  .admin-player-teams{grid-template-columns:1fr}
+  .admin-player-row{grid-template-columns:30px minmax(0,1fr)}
+  .admin-player-row button{grid-column:2;width:100%}
+  .admin-add-player{grid-template-columns:1fr}
+  .admin-add-player button{width:100%}
+}
