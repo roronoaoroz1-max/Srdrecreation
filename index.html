@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#07101d">
   <title>3v3 Futsal Championship</title>
-  <link rel="stylesheet" href="/styles.css?v=4.5.1">
+  <link rel="stylesheet" href="/styles.css?v=4.5.2">
 </head>
 <body>
   <div id="toast" class="toast"></div>
@@ -15,7 +15,7 @@
       <div class="public-board-head">
         <div>
           <div class="eyebrow">LIVE TOURNAMENT · NO LOGIN REQUIRED</div>
-          <h2>Next Match & Live Score <span class="badge">V4.5.1</span></h2>
+          <h2>Next Match & Live Score <span class="badge">V4.5.2</span></h2>
           <div class="muted">The live match or next scheduled match is always shown first.</div>
         </div>
         <button id="publicRefreshBtn" class="ghost" type="button">Refresh</button>
@@ -62,15 +62,9 @@
 
       <form id="playerLogin" class="form">
         <label>Your name<input id="playerName" required placeholder="Player name"></label>
-        <label>Team draw letter
-          <select id="playerDrawLetter" required>
-            <option value="">Select A–P...</option>
-            <option>A</option><option>B</option><option>C</option><option>D</option>
-            <option>E</option><option>F</option><option>G</option><option>H</option>
-            <option>I</option><option>J</option><option>K</option><option>L</option>
-            <option>M</option><option>N</option><option>O</option><option>P</option>
-            <option value="KDA">KDA — Kuda Adi</option>
-            <option value="WTC">WTC — Wanted Cow</option>
+        <label>Team
+          <select id="playerDrawLetter" required disabled>
+            <option value="">Teams available after official draw...</option>
           </select>
         </label>
         <div class="two">
@@ -145,6 +139,6 @@
     </div>
   </div>
 
-  <script src="/app.js?v=4.5.1"></script>
+  <script src="/app.js?v=4.5.2"></script>
 </body>
 </html>
