@@ -7,7 +7,7 @@ export async function onRequestPost(context) {
     const access = String(data.draw_letter || "").trim().toUpperCase();
 
     if (!name) return json({error:"Enter your name"},400);
-    if (!/^(?:[A-N]|KDA|WTC)$/.test(access)) return json({error:"Select your draw letter A–N or fixed M8 team code"},400);
+    if (!/^(?:[A-P]|KDA|WTC)$/.test(access)) return json({error:"Select your draw letter A–P or fixed team code"},400);
 
     const meta = await context.env.DB.prepare("SELECT value FROM meta WHERE key='draw_sequence'").first();
     let sequence = [];
