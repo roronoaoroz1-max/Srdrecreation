@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#07101d">
   <title>BOATYARD PISTON CUP 26</title>
-  <link rel="stylesheet" href="/styles.css?v=4.6.0">
+  <link rel="stylesheet" href="/styles.css?v=4.7.0">
 </head>
 <body>
   <div id="toast" class="toast"></div>
@@ -15,7 +15,7 @@
       <div class="public-board-head">
         <div>
           <div class="eyebrow">LIVE TOURNAMENT · NO LOGIN REQUIRED</div>
-          <h2>Next Match & Live Score <span class="badge">V4.6.0</span></h2>
+          <h2>Next Match & Live Score <span class="badge">V4.7.0</span></h2>
           <div class="muted">The live match or next scheduled match is always shown first.</div>
         </div>
         <div class="public-board-actions">
@@ -27,6 +27,8 @@
         <div class="notice">Loading live tournament data...</div>
       </div>
     </div>
+
+    <div id="publicTeamsPanel" class="public-teams-panel"></div>
 
     <div class="landing-panels">
       <div class="hero">
@@ -54,31 +56,22 @@
       <div class="section-title login-card-title">
         <div>
           <div class="eyebrow">SIGN IN</div>
-          <h2>Player / Admin Login</h2>
+          <h2>Team / Admin Login</h2>
         </div>
         <button id="hideLoginBtn" class="ghost" type="button">Hide</button>
       </div>
       <div class="tabs">
-        <button class="tab active" data-tab="player">Player</button>
+        <button class="tab active" data-tab="player">Team</button>
         <button class="tab" data-tab="admin">Admin</button>
       </div>
 
       <form id="playerLogin" class="form">
-        <label>Your name<input id="playerName" required placeholder="Player name"></label>
-        <label>Team
-          <select id="playerDrawLetter" required disabled>
-            <option value="">Teams available after official draw...</option>
+        <label>Select your team
+          <select id="playerTeam" required disabled>
+            <option value="">Loading teams...</option>
           </select>
         </label>
-        <div class="two">
-          <label>Shirt #<input id="playerShirt" type="number" min="0" max="99" placeholder="Optional"></label>
-          <label>Position
-            <select id="playerPosition">
-              <option>Player</option><option>Goalkeeper</option><option>Fixo</option><option>Ala</option><option>Pivot</option><option>Sub</option>
-            </select>
-          </label>
-        </div>
-        <button class="primary">Enter tournament</button>
+        <button class="primary">Enter team page</button>
       </form>
 
       <form id="adminLogin" class="form hidden">
@@ -142,6 +135,6 @@
     </div>
   </div>
 
-  <script src="/app.js?v=4.6.0"></script>
+  <script src="/app.js?v=4.7.0"></script>
 </body>
 </html>
