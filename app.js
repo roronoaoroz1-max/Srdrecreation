@@ -146,7 +146,7 @@ function renderHome(){
   const c=state.data.config,n=nextMatch(),t=teamById(myTeam()),arr=n?arrivalTime(n):"—";
   $("homePage").innerHTML=`<div class="grid">
     <div class="card span-3"><div class="muted">Tournament</div><div class="stat">16 Teams</div><div class="kicker">15-match knockout</div></div>
-    <div class="card span-3"><div class="muted">Draw</div><div class="stat">${state.data.draw.completed?"Completed":"Pending"}</div><div class="kicker">Letters A–N</div></div>
+    <div class="card span-3"><div class="muted">Draw</div><div class="stat">${state.data.draw.completed?"Completed":"Pending"}</div><div class="kicker">Letters A–P</div></div>
     <div class="card span-3"><div class="muted">${state.role==="player"?"My draw letter":"Venue"}</div><div class="stat">${state.role==="player"?esc(teamDrawLetter(myTeam())):esc(c.venue)}</div><div class="kicker">${state.role==="player"?esc(t?.name||""):"Tournament venue"}</div></div>
     <div class="card span-3"><div class="muted">${state.role==="player"?"Be at stadium by":"Start"}</div><div class="stat">${state.role==="player"?esc(arr):esc(c.start_time)}</div><div class="kicker">${state.role==="player"?(n?`${esc(n.match_no)} starts ${esc(n.start_time)}`:"No match yet"):esc(c.date)}</div></div>
     <div class="card span-8"><div class="section-title"><h3>${state.role==="player"?"Your tournament":"Tournament status"}</h3><button class="secondary" onclick="showPage('bracket')">Open bracket</button></div>${state.role==="player"?(n?`${arrivalNote(n)}${fixture(n)}`:`<div class="notice">${state.data.draw.completed?"No upcoming match assigned.":"The official draw has not started yet."}</div>`):`<div class="notice"><strong>${state.data.draw.completed?"Draw completed.":"Ready for the official draw."}</strong><br>${state.data.draw.completed?"Use Live Match Control in Admin to publish scores instantly.":"Open Admin and start the draw."}</div>`}</div>
@@ -182,10 +182,11 @@ function renderGuide(){
     ["A","M7 Team 2"],["B","M1 Team 1"],["C","M1 Team 2"],
     ["D","M2 Team 1"],["E","M2 Team 2"],["F","M3 Team 1"],["G","M3 Team 2"],
     ["H","M7 Team 1"],["I","M4 Team 1"],["J","M4 Team 2"],
-    ["K","M5 Team 1"],["L","M5 Team 2"],["M","M6 Team 1"],["N","M6 Team 2"]
+    ["K","M5 Team 1"],["L","M5 Team 2"],["M","M6 Team 1"],["N","M6 Team 2"],
+    ["O","M8 Team 1"],["P","M8 Team 2"]
   ];
-  $("guidePage").innerHTML=`<div class="card"><div class="kicker">ONE-PAGE TOURNAMENT GUIDE</div><h3>How the tournament works</h3><p class="muted">16 teams play single elimination. Fourteen teams are assigned draw letters A–N. Kuda Adi and Wanted Cow are fixed in M8.</p><div class="notice"><b>M1:</b> B vs C · <b>M2:</b> D vs E · <b>M3:</b> F vs G · <b>M4:</b> I vs J<br><b>M5:</b> K vs L · <b>M6:</b> M vs N · <b>M7:</b> H vs A · <b>M8:</b> Kuda Adi vs Wanted Cow<br><br><b>QF1:</b> Winner M1 vs Winner M2<br><b>QF2:</b> Winner M3 vs Winner M4<br><b>QF3:</b> Winner M5 vs Winner M6<br><b>QF4:</b> Winner M7 vs Winner M8<br><br><b>SF1:</b> Winner QF1 vs Winner QF2<br><b>SF2:</b> Winner QF3 vs Winner QF4<br>Then Final.</div></div>
-  <div class="card"><div class="section-title"><h3>Letter positions</h3><span class="badge">A–N + fixed M8</span></div><div class="table-wrap"><table><thead><tr><th>Letter</th><th>Position</th></tr></thead><tbody>${rows.map(([a,b])=>`<tr><td><b>${a}</b></td><td>${b}</td></tr>`).join("")}<tr><td><b>KDA</b></td><td>M8 · Kuda Adi</td></tr><tr><td><b>WTC</b></td><td>M8 · Wanted Cow</td></tr></tbody></table></div></div>
+  $("guidePage").innerHTML=`<div class="card"><div class="kicker">ONE-PAGE TOURNAMENT GUIDE</div><h3>How the tournament works</h3><p class="muted">16 teams play single elimination using draw letters A–P. M8 uses letters O and P.</p><div class="notice"><b>M1:</b> B vs C · <b>M2:</b> D vs E · <b>M3:</b> F vs G · <b>M4:</b> I vs J<br><b>M5:</b> K vs L · <b>M6:</b> M vs N · <b>M7:</b> H vs A · <b>M8:</b> O vs P<br><br><b>QF1:</b> Winner M1 vs Winner M2<br><b>QF2:</b> Winner M3 vs Winner M4<br><b>QF3:</b> Winner M5 vs Winner M6<br><b>QF4:</b> Winner M7 vs Winner M8<br><br><b>SF1:</b> Winner QF1 vs Winner QF2<br><b>SF2:</b> Winner QF3 vs Winner QF4<br>Then Final.</div></div>
+  <div class="card"><div class="section-title"><h3>Letter positions</h3><span class="badge">A–P</span></div><div class="table-wrap"><table><thead><tr><th>Letter</th><th>Position</th></tr></thead><tbody>${rows.map(([a,b])=>`<tr><td><b>${a}</b></td><td>${b}</td></tr>`).join("")}<tr><td><b>KDA</b></td><td>M8 · Kuda Adi</td></tr><tr><td><b>WTC</b></td><td>M8 · Wanted Cow</td></tr></tbody></table></div></div>
   <div class="card"><h3>Timing & login</h3><div class="rule-grid"><div class="rule"><strong>${c.first_half}+${c.halftime}+${c.second_half} min</strong><span class="muted">First half + halftime + second half</span></div><div class="rule"><strong>${c.changeover} min</strong><span class="muted">Changeover</span></div><div class="rule"><strong>Arrive ${c.arrival_minutes??5} min early</strong><span class="muted">Players see a “be at stadium by” time for every upcoming team match.</span></div><div class="rule"><strong>Public live board</strong><span class="muted">Scores can be viewed before login.</span></div><div class="rule"><strong>Player login</strong><span class="muted">Draw teams use A–N. Kuda Adi uses KDA and Wanted Cow uses WTC.</span></div></div></div>`;
 }
 function renderRules(){
@@ -229,11 +230,12 @@ function manualDrawSlots(){
     {letter:"H",label:"M7 Team 1"},
     {letter:"I",label:"M4 Team 1"},{letter:"J",label:"M4 Team 2"},
     {letter:"K",label:"M5 Team 1"},{letter:"L",label:"M5 Team 2"},
-    {letter:"M",label:"M6 Team 1"},{letter:"N",label:"M6 Team 2"}
+    {letter:"M",label:"M6 Team 1"},{letter:"N",label:"M6 Team 2"},
+    {letter:"O",label:"M8 Team 1"},{letter:"P",label:"M8 Team 2"}
   ];
 }
 function currentTeamForLetter(letter){return state.data.draw?.sequence?.find(x=>x.letter===letter)?.team_id||""}
-function teamOptions(selected=""){return `<option value="">Select team...</option>`+state.data.teams.filter(t=>t.id!=="t9"&&t.id!=="t15").map(t=>`<option value="${esc(t.id)}" ${selected===t.id?"selected":""}>${esc(t.name)}</option>`).join("")}
+function teamOptions(selected=""){return `<option value="">Select team...</option>`+state.data.teams.map(t=>`<option value="${esc(t.id)}" ${selected===t.id?"selected":""}>${esc(t.name)}</option>`).join("")}
 function setAdminDrawMode(mode){
   state.adminDrawMode=mode;
   if(mode==="manual" && !state.manualDrawDraft){
@@ -248,8 +250,8 @@ window.setAdminDrawMode=setAdminDrawMode;
 async function submitManualDraw(){
   const selects=[...document.querySelectorAll("[data-manual-slot]")];
   const order=selects.map(x=>x.value);
-  if(order.some(v=>!v))return toast("Assign a team to every letter A–N.");
-  if(new Set(order).size!==14)return toast("Each team must appear exactly once.");
+  if(order.some(v=>!v))return toast("Assign a team to every letter A–P.");
+  if(new Set(order).size!==16)return toast("Each team must appear exactly once.");
   state.manualDrawDraft=Object.fromEntries(selects.map(x=>[x.dataset.manualSlot,x.value]));
   if(state.data.draw.completed&&!confirm("Replace the existing draw and clear all current match results with this manual draw?"))return;
   try{
@@ -368,7 +370,7 @@ function renderAdmin(){
 
     <div id="adminDrawSection" class="card span-12 admin-section"><div class="section-title"><div><div class="kicker">DRAW CONTROL</div><h3>Automatic or manual letter draw</h3></div><span class="badge ${state.data.draw.completed?"ok":""}">${state.data.draw.completed?"Draw exists":"Ready"}</span></div>
       <div class="draw-choice-tabs"><button type="button" class="secondary ${state.adminDrawMode==="auto"?"active":""}" data-draw-mode="auto" onclick="setAdminDrawMode('auto')">Automatic animated draw</button><button type="button" class="secondary ${state.adminDrawMode==="manual"?"active":""}" data-draw-mode="manual" onclick="setAdminDrawMode('manual')">Manual / edit draw</button></div>
-      <div id="autoDrawSection" class="${state.adminDrawMode==="auto"?"":"hidden"}"><p class="muted">Randomly assigns A–N to the 14 draw teams. Kuda Adi vs Wanted Cow is fixed as M8.</p><div class="actions"><button id="startDrawBtn" type="button" class="primary">${state.data.draw.completed?"Run another automatic draw":"Start animated draw"}</button>${state.data.draw.completed?`<button type="button" class="secondary" onclick="setAdminDrawMode('manual')">Edit current draw manually</button>`:""}<button type="button" class="secondary" onclick="showPage('draw')">View current draw</button></div></div>
+      <div id="autoDrawSection" class="${state.adminDrawMode==="auto"?"":"hidden"}"><p class="muted">Draw uses letters A–P. O and P are the M8 positions; automatic draw keeps Kuda Adi vs Wanted Cow there, while manual draw lets Admin edit all 16 letters.</p><div class="actions"><button id="startDrawBtn" type="button" class="primary">${state.data.draw.completed?"Run another automatic draw":"Start animated draw"}</button>${state.data.draw.completed?`<button type="button" class="secondary" onclick="setAdminDrawMode('manual')">Edit current draw manually</button>`:""}<button type="button" class="secondary" onclick="showPage('draw')">View current draw</button></div></div>
       <div id="manualDrawSection" class="${state.adminDrawMode==="manual"?"":"hidden"}"><div class="notice manual-stable-note"><b>Manual editor stays open while you work.</b><br>After an automatic draw, current assignments are pre-selected. Change only what you need, then apply.</div>
         <div class="manual-draw-grid">${slots.map(slot=>{const selected=state.manualDrawDraft?.[slot.letter]??currentTeamForLetter(slot.letter);return `<div class="manual-slot"><div class="kicker">LETTER ${slot.letter} · ${slot.label}</div><select data-manual-slot="${slot.letter}">${teamOptions(selected)}</select></div>`}).join("")}</div>
         <div class="actions" style="margin-top:14px"><button type="button" class="primary" onclick="submitManualDraw()">Apply manual letter draw</button></div>
