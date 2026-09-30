@@ -9,8 +9,8 @@ export async function onRequestPost(context) {
     const data = await body(context.request);
     const teams = Array.isArray(data.teams) ? data.teams : [];
 
-    if (teams.length !== 14) {
-      return json({ error: "Exactly 14 team entries are required" }, 400);
+    if (teams.length !== 16) {
+      return json({ error: "Exactly 16 team entries are required" }, 400);
     }
 
     const names = teams.map(t => String(t.name || "").trim());
@@ -22,10 +22,10 @@ export async function onRequestPost(context) {
     if (codes.some(x => !x)) {
       return json({ error: "Every team must have a login code" }, 400);
     }
-    if (new Set(names.map(x => x.toLowerCase())).size !== 14) {
+    if (new Set(names.map(x => x.toLowerCase())).size !== 16) {
       return json({ error: "Team names must be unique" }, 400);
     }
-    if (new Set(codes).size !== 14) {
+    if (new Set(codes).size !== 16) {
       return json({ error: "Team login codes must be unique" }, 400);
     }
 
