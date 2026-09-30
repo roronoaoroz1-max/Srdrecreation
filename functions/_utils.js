@@ -130,6 +130,28 @@ export async function ensureTournamentPlayers(DB) {
     .bind(version).run();
 }
 
+export async function ensureMatchEvents(DB) {
+  await DB.batch([
+    DB.prepare(`
+      CREATE TABLE IF NOT EXISTS match_events (
+        id TEXT PRIMARY KEY,
+        match_no TEXT NOT NULL,
+        event_type TEXT NOT NULL,
+        team_id TEXT NOT NULL,
+        player_id TEXT,
+        minute INTEGER NOT NULL DEFAULT 0,
+        second INTEGER NOT NULL DEFAULT 0,
+        detail TEXT,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY(match_no) REFERENCES matches(match_no) ON DELETE CASCADE,
+        FOREIGN KEY(team_id) REFERENCES teams(id),
+        FOREIGN KEY(player_id) REFERENCES players(id)
+      )
+    `),
+    DB.prepare("CREATE INDEX IF NOT EXISTS idx_match_events_match ON match_events(match_no, created_at)")
+  ]);
+}
+
 export async function getConfig(DB) {
   const rows = await DB.prepare("SELECT key,value FROM meta WHERE key LIKE 'config_%'").all();
   const map = Object.fromEntries((rows.results||[]).map(r=>[r.key,r.value]));
@@ -152,10 +174,12 @@ export async function getConfig(DB) {
 export async function getState(DB, includeCodes=false) {
   await ensureTournamentTeams(DB);
   await ensureTournamentPlayers(DB);
-  const [teamsQ, playersQ, matchesQ, noticesQ, metaQ] = await Promise.all([
+  await ensureMatchEvents(DB);
+  const [teamsQ, playersQ, matchesQ, eventsQ, noticesQ, metaQ] = await Promise.all([
     DB.prepare(`SELECT id,name${includeCodes ? ",code" : ""} FROM teams ORDER BY sort_order`).all(),
     DB.prepare("SELECT id,name,team_id,shirt_no,position,created_at FROM players ORDER BY created_at").all(),
     DB.prepare("SELECT * FROM matches ORDER BY sort_order").all(),
+    DB.prepare("SELECT id,match_no,event_type,team_id,player_id,minute,second,detail,created_at FROM match_events ORDER BY created_at, rowid").all(),
     DB.prepare("SELECT id,title,body,created_at FROM announcements ORDER BY created_at DESC").all(),
     DB.prepare("SELECT key,value FROM meta").all()
   ]);
@@ -167,6 +191,7 @@ export async function getState(DB, includeCodes=false) {
     teams: teamsQ.results || [],
     players: playersQ.results || [],
     matches: matchesQ.results || [],
+    events: eventsQ.results || [],
     announcements: noticesQ.results || [],
     draw: {
       completed: meta.draw_completed === "1",
