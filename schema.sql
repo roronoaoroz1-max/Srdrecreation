@@ -81,5 +81,5 @@ INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t11','Vihssaagendha
 INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t12','Team RMD Lions','RMD-792',12);
 INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t13','Team Inventory','INV-438',13);
 INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t14','Jehee Jehee','JHJ-186',14);
-INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t15','Kuda Adi','KDA-001',15);
-INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t16','Precast SC','PSC-001',16);
+INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t15','Kuda Adi','KDA-001',16);
+INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t16','Precast SC','PSC-001',15);
