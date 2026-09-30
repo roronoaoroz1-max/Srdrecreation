@@ -6,8 +6,8 @@ export async function onRequestPost(context) {
   try {
     const data=await body(context.request);
     const order=Array.isArray(data.team_order)?data.team_order:[];
-    if(order.length!==14) return json({error:"Assign a team to every letter A–N"},400);
-    if(new Set(order).size!==14) return json({error:"Each team can be used only once"},400);
+    if(order.length!==16) return json({error:"Assign a team to every letter A–P"},400);
+    if(new Set(order).size!==16) return json({error:"Each team can be used only once"},400);
 
     const DB=context.env.DB;
     await ensureTournamentTeams(DB);
@@ -15,17 +15,11 @@ export async function onRequestPost(context) {
     const teams=teamsQ.results||[];
     if(teams.length!==16) return json({error:"Exactly 16 teams are required"},400);
 
-    const wantedCow=teams.find(t=>t.id==="t9");
-    const kudaAdi=teams.find(t=>t.id==="t15");
-    if(!wantedCow||!kudaAdi) return json({error:"Fixed M8 teams are missing"},500);
-
-    const eligible=teams.filter(t=>t.id!=="t9"&&t.id!=="t15");
-    const valid=new Set(eligible.map(t=>t.id));
-    if(order.some(id=>!valid.has(id))) return json({error:"Manual draw can only use the 14 A–N draw teams"},400);
-    if(order.length!==eligible.length) return json({error:"Every A–N draw team must be assigned once"},400);
+    const valid=new Set(teams.map(t=>t.id));
+    if(order.some(id=>!valid.has(id))) return json({error:"Manual draw contains an unknown team"},400);
 
     const byId=Object.fromEntries(teams.map(t=>[t.id,t]));
-    const letters=["A","B","C","D","E","F","G","H","I","J","K","L","M","N"];
+    const letters=["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"];
     const byLetter={};
     const sequence=[];
 
@@ -52,7 +46,7 @@ export async function onRequestPost(context) {
         null,null,cfg.date,hhmm(start+i*slot),"Court 1",i+1
       ]));
 
-    matches.push(["M8","Round 1",kudaAdi.id,wantedCow.id,null,null,cfg.date,hhmm(start+7*slot),"Court 1",8]);
+    matches.push(["M8","Round 1",byLetter.O.id,byLetter.P.id,null,null,cfg.date,hhmm(start+7*slot),"Court 1",8]);
 
     const q=start+8*slot;
     matches.push(["QF1","Quarterfinal",null,null,"Winner M1","Winner M2",cfg.date,hhmm(q),"Court 1",9]);
@@ -96,7 +90,8 @@ function matchSlot(letter){
     H:"M7 · Team 1",
     I:"M4 · Team 1", J:"M4 · Team 2",
     K:"M5 · Team 1", L:"M5 · Team 2",
-    M:"M6 · Team 1", N:"M6 · Team 2"
+    M:"M6 · Team 1", N:"M6 · Team 2",
+    O:"M8 · Team 1", P:"M8 · Team 2"
   };
   return map[letter] || "";
 }
