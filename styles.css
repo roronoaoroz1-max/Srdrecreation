@@ -284,3 +284,150 @@ table{width:100%;border-collapse:collapse;min-width:760px}th,td{padding:10px;bor
 .round.final .match-card{
   align-self:center;
 }
+
+
+/* V4.6: responsive phone/tablet/laptop layout + dedicated projector mode */
+:root{--page-max:1360px}
+
+.public-board-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.projector-link{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.content{width:min(var(--page-max),100%)}
+.login-shell{width:min(var(--page-max),100%)}
+.public-scoreline .team{min-width:0}
+.public-scoreline .team strong,
+.fixture strong{overflow-wrap:anywhere}
+.public-small-item strong{text-align:right;overflow-wrap:anywhere}
+button,.primary,.secondary,.ghost,.tab,.projector-link{min-height:44px}
+
+/* Phone */
+@media(max-width:560px){
+  .login-shell{padding:10px;gap:10px}
+  .public-board{padding:12px;border-radius:16px}
+  .public-board-head{display:grid;grid-template-columns:1fr;gap:10px}
+  .public-board-actions{display:grid;grid-template-columns:1fr 1fr}
+  .public-board-actions>*{width:100%}
+  .landing-panels{grid-template-columns:1fr;gap:10px}
+  .landing-panels .hero,.access-card{padding:16px;border-radius:16px}
+  .landing-panels .hero h1{font-size:28px}
+  .landing-panels .hero p{font-size:15px;line-height:1.5}
+  .stats{grid-template-columns:1fr 1fr;gap:8px}
+  .stats div{padding:11px}.stats b{font-size:23px}
+  .public-feature-match{padding:13px}
+  .public-scoreline-feature{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:6px}
+  .public-scoreline-feature .team strong{font-size:14px}
+  .public-scoreline-feature .public-score{font-size:28px;min-width:66px}
+  .public-feature-meta{font-size:11px}
+  .public-details-grid{grid-template-columns:1fr;gap:10px}
+  .public-match{padding:12px}
+  .fixture{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:7px}
+  .fixture strong{font-size:13px}
+  .score{min-width:54px;font-size:16px}
+  .login-card{padding:14px;border-radius:16px}
+  .two{grid-template-columns:1fr}
+  .topbar{padding:9px 10px}
+  .content{padding:9px}
+  .bottom-nav{justify-content:flex-start;scroll-snap-type:x proximity}
+  .nav-btn{min-width:70px;scroll-snap-align:start}
+}
+
+/* Tablet */
+@media(min-width:561px) and (max-width:1024px){
+  .login-shell{padding:16px}
+  .landing-panels{grid-template-columns:minmax(0,1.25fr) minmax(250px,.75fr)}
+  .landing-panels .hero{padding:24px}
+  .landing-panels .hero h1{font-size:38px}
+  .public-details-grid{grid-template-columns:1fr 1fr}
+  .public-info-panel{grid-column:1 / -1}
+  .public-scoreline-feature .public-score{font-size:44px;min-width:110px}
+  .content{padding:14px}
+  .settings-grid{grid-template-columns:1fr 1fr}
+  .schedule-grid{grid-template-columns:1fr}
+}
+
+/* Laptop / desktop */
+@media(min-width:1025px){
+  .login-shell{padding:24px}
+  .public-feature-match{padding:24px}
+  .public-scoreline-feature{min-height:104px}
+  .public-scoreline-feature .public-score{font-size:56px}
+  .public-details-grid{grid-template-columns:.8fr 1.1fr 1.1fr}
+  .bottom-nav{left:50%;right:auto;transform:translateX(-50%);width:min(1120px,calc(100% - 24px));border:1px solid var(--line);border-bottom:0;border-radius:16px 16px 0 0}
+}
+
+/* Projector: append ?projector=1 to the public URL. No login UI is rendered on screen. */
+body.projector-mode{
+  background:#050b13;
+}
+body.projector-mode .login-shell{
+  width:100%;
+  max-width:none;
+  padding:18px 22px;
+  gap:0;
+}
+body.projector-mode .landing-panels,
+body.projector-mode #loginCard{
+  display:none!important;
+}
+body.projector-mode .public-board{
+  width:100%;
+  border-radius:18px;
+  padding:22px 26px;
+  box-shadow:none;
+}
+body.projector-mode .public-board-head .eyebrow{
+  font-size:15px;
+}
+body.projector-mode .public-board-head h2{
+  font-size:34px;
+}
+body.projector-mode .public-board-head .muted{
+  font-size:16px;
+}
+body.projector-mode .public-feature-match{
+  padding:28px;
+}
+body.projector-mode .public-feature-match h3{
+  font-size:28px;
+}
+body.projector-mode .public-scoreline-feature{
+  min-height:160px;
+}
+body.projector-mode .public-scoreline-feature .team strong{
+  font-size:clamp(28px,3vw,48px);
+}
+body.projector-mode .public-scoreline-feature .public-score{
+  font-size:clamp(58px,7vw,104px);
+  min-width:210px;
+}
+body.projector-mode .public-status{
+  font-size:18px;
+  padding:8px 14px;
+}
+body.projector-mode .public-feature-meta{
+  font-size:18px;
+}
+body.projector-mode .public-details-grid{
+  grid-template-columns:.8fr 1.2fr 1.2fr;
+  gap:14px;
+}
+body.projector-mode .public-match{
+  padding:18px;
+}
+body.projector-mode .public-match h3{
+  font-size:22px;
+}
+body.projector-mode .fixture{
+  padding:12px 0;
+}
+body.projector-mode .fixture strong{
+  font-size:18px;
+}
+body.projector-mode .score{
+  font-size:22px;
+}
+body.projector-mode .public-small-item{
+  font-size:17px;
+}
+body.projector-mode #publicRefreshBtn{
+  min-width:110px;
+}
