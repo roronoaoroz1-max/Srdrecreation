@@ -5,32 +5,18 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#07101d">
   <title>3v3 Futsal Championship</title>
-  <link rel="stylesheet" href="/styles.css?v=4.4.1">
+  <link rel="stylesheet" href="/styles.css?v=4.5.0">
 </head>
 <body>
   <div id="toast" class="toast"></div>
 
   <section id="loginView" class="login-shell">
-    <div class="hero">
-      <div class="ball">⚽</div>
-      <div class="eyebrow">14-TEAM KNOCKOUT</div>
-      <h1>3v3 Futsal Championship</h1>
-      <p>Live draw, bracket, fixtures, results and team information available from anywhere.</p>
-      <div class="stats">
-        <div><b>16</b><span>Teams</span></div>
-        <div><b>15</b><span>Matches</span></div>
-        <div><b>8</b><span>Round 1 matches</span></div>
-        <div><b>3v3</b><span>Format</span></div>
-      </div>
-    </div>
-
-
     <div id="publicBoard" class="public-board">
       <div class="public-board-head">
         <div>
-          <div class="eyebrow">PUBLIC LIVE SCORE · NO LOGIN REQUIRED</div>
-          <h2>Live Tournament <span class="badge">V4.4.1</span></h2>
-          <div class="muted">Updates automatically every 4 seconds.</div>
+          <div class="eyebrow">LIVE TOURNAMENT · NO LOGIN REQUIRED</div>
+          <h2>Next Match & Live Score <span class="badge">V4.5</span></h2>
+          <div class="muted">The live match or next scheduled match is always shown first.</div>
         </div>
         <button id="publicRefreshBtn" class="ghost" type="button">Refresh</button>
       </div>
@@ -39,7 +25,36 @@
       </div>
     </div>
 
-    <div class="login-card">
+    <div class="landing-panels">
+      <div class="hero">
+        <div class="ball">⚽</div>
+        <div class="eyebrow">16-TEAM KNOCKOUT</div>
+        <h1>3v3 Futsal Championship</h1>
+        <p>Live score, match schedule, bracket, results and tournament information are public. Login is only needed for player/team access or administration.</p>
+        <div class="stats">
+          <div><b>16</b><span>Teams</span></div>
+          <div><b>15</b><span>Matches</span></div>
+          <div><b>8</b><span>Round 1 matches</span></div>
+          <div><b>3v3</b><span>Format</span></div>
+        </div>
+      </div>
+
+      <div class="access-card">
+        <div class="eyebrow">TOURNAMENT ACCESS</div>
+        <h2>Player or Admin</h2>
+        <p class="muted">You can view the live tournament without signing in. Open login only when you need your player page or Admin controls.</p>
+        <button id="showLoginBtn" class="primary" type="button" aria-expanded="false" aria-controls="loginCard">Open login</button>
+      </div>
+    </div>
+
+    <div id="loginCard" class="login-card hidden">
+      <div class="section-title login-card-title">
+        <div>
+          <div class="eyebrow">SIGN IN</div>
+          <h2>Player / Admin Login</h2>
+        </div>
+        <button id="hideLoginBtn" class="ghost" type="button">Hide</button>
+      </div>
       <div class="tabs">
         <button class="tab active" data-tab="player">Player</button>
         <button class="tab" data-tab="admin">Admin</button>
@@ -54,8 +69,8 @@
             <option>E</option><option>F</option><option>G</option><option>H</option>
             <option>I</option><option>J</option><option>K</option><option>L</option>
             <option>M</option><option>N</option><option>O</option><option>P</option>
-            <option value="KDA">KDA — Kuda Adi (fixed M8)</option>
-            <option value="WTC">WTC — Wanted Cow (fixed M8)</option>
+            <option value="KDA">KDA — Kuda Adi</option>
+            <option value="WTC">WTC — Wanted Cow</option>
           </select>
         </label>
         <div class="two">
@@ -126,10 +141,10 @@
       </div>
       <div id="revealedName" class="revealed-name"></div>
       <div class="draw-progress"><div id="drawProgressBar"></div></div>
-      <div id="drawCounter" class="draw-counter">0 / 14</div>
+      <div id="drawCounter" class="draw-counter">0 / 16</div>
     </div>
   </div>
 
-  <script src="/app.js?v=4.4.1"></script>
+  <script src="/app.js?v=4.5.0"></script>
 </body>
 </html>
