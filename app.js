@@ -45,7 +45,7 @@ function renderPlayerTeamOptions(){
 function teamRosterDetails(t,open=false){
   const ps=(state.data.players||[]).filter(p=>p.team_id===t.id);
   const letter=teamDrawLetter(t.id);
-  return `<details class="team-roster-card" ${open?"open":""}>
+  return `<details class="team-roster-card" data-team-id="${esc(t.id)}" ${open?"open":""}>
     <summary>
       <span class="team-roster-title"><strong>${esc(t.name)}</strong><small>${letter!=="—"?"Letter "+esc(letter):"Team roster"}</small></span>
       <span class="badge">${ps.length} players</span>
@@ -57,9 +57,16 @@ function teamRosterDetails(t,open=false){
 function renderPublicTeams(){
   const panel=$("publicTeamsPanel");
   if(!panel||!state.data)return;
+
+  // Preserve expanded teams when the public data auto-refreshes.
+  const openTeams=new Set(
+    [...panel.querySelectorAll("details.team-roster-card[open][data-team-id]")]
+      .map(d=>d.dataset.teamId)
+  );
+
   panel.innerHTML=`<div class="section-title public-teams-head"><div><div class="eyebrow">TEAMS & PLAYERS</div><h2>Team Rosters</h2></div><span class="badge">${state.data.teams.length} teams</span></div>
     <p class="muted public-teams-help">Tap or click a team to see its players.</p>
-    <div class="team-roster-grid">${state.data.teams.map(t=>teamRosterDetails(t)).join("")}</div>`;
+    <div class="team-roster-grid">${state.data.teams.map(t=>teamRosterDetails(t,openTeams.has(t.id))).join("")}</div>`;
 }
 async function refresh(){
   state.data=await api(state.role==="admin"?"/api/admin/state":"/api/state");
