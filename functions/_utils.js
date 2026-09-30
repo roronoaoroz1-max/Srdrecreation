@@ -105,7 +105,8 @@ export async function ensureTournamentTeams(DB) {
     DB.prepare("INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t15','Kuda Adi','KDA-001',16)"),
     DB.prepare("INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t16','Precast SC','PSC-001',15)"),
     DB.prepare("UPDATE teams SET sort_order=16 WHERE id='t15' AND name='Kuda Adi'"),
-    DB.prepare("UPDATE teams SET sort_order=15 WHERE id='t16' AND name='Precast SC'")
+    DB.prepare("UPDATE teams SET sort_order=15 WHERE id='t16' AND name='Precast SC'"),
+    DB.prepare("UPDATE meta SET value='BOATYARD PISTON CUP 26' WHERE key='config_tournament_name' AND value='3v3 Futsal Championship'")
   ]);
 }
 
@@ -113,7 +114,7 @@ export async function getConfig(DB) {
   const rows = await DB.prepare("SELECT key,value FROM meta WHERE key LIKE 'config_%'").all();
   const map = Object.fromEntries((rows.results||[]).map(r=>[r.key,r.value]));
   return {
-    tournament_name: map.config_tournament_name || "3v3 Futsal Championship",
+    tournament_name: map.config_tournament_name || "BOATYARD PISTON CUP 26",
     venue: map.config_venue || "Boatyard Futsal Area",
     date: map.config_date || "2026-10-01",
     start_time: map.config_start_time || "09:00",
