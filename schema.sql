@@ -39,6 +39,23 @@ CREATE TABLE IF NOT EXISTS matches (
   FOREIGN KEY(winner_team_id) REFERENCES teams(id)
 );
 
+CREATE TABLE IF NOT EXISTS match_events (
+  id TEXT PRIMARY KEY,
+  match_no TEXT NOT NULL,
+  event_type TEXT NOT NULL,
+  team_id TEXT NOT NULL,
+  player_id TEXT,
+  minute INTEGER NOT NULL DEFAULT 0,
+  second INTEGER NOT NULL DEFAULT 0,
+  detail TEXT,
+  created_at TEXT NOT NULL,
+  FOREIGN KEY(match_no) REFERENCES matches(match_no) ON DELETE CASCADE,
+  FOREIGN KEY(team_id) REFERENCES teams(id),
+  FOREIGN KEY(player_id) REFERENCES players(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_match_events_match ON match_events(match_no, created_at);
+
 CREATE TABLE IF NOT EXISTS announcements (
   id TEXT PRIMARY KEY,
   title TEXT NOT NULL,
