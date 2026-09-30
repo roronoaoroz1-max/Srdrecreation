@@ -9,6 +9,7 @@ export async function onRequestPost(context) {
     const DB=context.env.DB;
 
     const q=[
+      DB.prepare("DELETE FROM match_events"),
       // Clear every score/result/status but keep the draw, teams, players and schedule times.
       DB.prepare(`
         UPDATE matches
