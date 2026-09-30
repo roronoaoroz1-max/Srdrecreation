@@ -86,9 +86,26 @@ export function hhmm(n) {
 }
 
 export async function ensureTournamentTeams(DB) {
+  const q = await DB.prepare("SELECT id,name,code,sort_order FROM teams WHERE id IN ('t9','t15','t16')").all();
+  const rows = q.results || [];
+  const byId = Object.fromEntries(rows.map(r => [r.id, r]));
+
+  // One-time repair for the current database state:
+  // Wanted Cow (t9) was manually renamed to Precast SC before the 16th team was added.
+  if (!byId.t16 && String(byId.t9?.name || "").trim().toLowerCase() === "precast sc") {
+    await DB.batch([
+      DB.prepare("UPDATE teams SET name='Wanted Cow', code='WTC-267', sort_order=9 WHERE id='t9'"),
+      DB.prepare("INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t15','Kuda Adi','KDA-001',16)"),
+      DB.prepare("INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t16','Precast SC','PSC-001',15)")
+    ]);
+    return;
+  }
+
   await DB.batch([
-    DB.prepare("INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t15','Kuda Adi','KDA-001',15)"),
-    DB.prepare("INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t16','Precast SC','PSC-001',16)")
+    DB.prepare("INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t15','Kuda Adi','KDA-001',16)"),
+    DB.prepare("INSERT OR IGNORE INTO teams(id,name,code,sort_order) VALUES('t16','Precast SC','PSC-001',15)"),
+    DB.prepare("UPDATE teams SET sort_order=16 WHERE id='t15' AND name='Kuda Adi'"),
+    DB.prepare("UPDATE teams SET sort_order=15 WHERE id='t16' AND name='Precast SC'")
   ]);
 }
 
