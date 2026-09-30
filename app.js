@@ -470,6 +470,20 @@ async function refreshAdminNow(){
 }
 window.refreshAdminNow=refreshAdminNow;
 
+async function resetScoresOnly(){
+  if(!state.data.draw?.completed)return toast("Complete the draw first.");
+  if(!confirm("Clear ALL test scores/results and restart from M1?\n\nTeams, players, draw letters, match times and tournament settings will NOT be changed."))return;
+  try{
+    const out=await api("/api/admin/reset-scores",{method:"POST",body:"{}"});
+    state.data=out.state;
+    renderAll();renderPublicBoard();
+    showPage("admin");
+    setTimeout(()=>scrollAdminSection("adminLiveSection"),0);
+    toast("Scores cleared. Restarted from M1.");
+  }catch(e){toast(e.message)}
+}
+window.resetScoresOnly=resetScoresOnly;
+
 async function restartDraw(){
   const password=$("restartPassword").value;
   if(!password)return toast("Enter the admin password to restart the draw.");
@@ -506,6 +520,10 @@ function renderAdmin(){
 
     <div id="adminLiveSection" class="card span-12 admin-section"><div class="section-title"><div><div class="kicker">LIVE MATCH CONTROL</div><h3>Current score & final result</h3></div><span class="badge ${playable.some(m=>m.status==="Live")?"live":""}">${playable.some(m=>m.status==="Live")?"LIVE NOW":`${playable.length} playable`}</span></div>
       <p class="muted">Start a match LIVE, update the score during play, then save the final result. The public page updates without player login.</p>
+      <div class="test-score-reset">
+        <div><div class="kicker">SAFE TEST RESET</div><strong>Testing scores/results?</strong><div class="muted">Clears only match scores and winners, then starts again from M1. Players, rosters, draw letters, teams, settings and match times stay unchanged.</div></div>
+        <button type="button" class="secondary" onclick="resetScoresOnly()">↻ Clear scores & restart M1</button>
+      </div>
       <div class="grid live-control-grid">${sortedPlayable.map(m=>{const{h,a}=pair(m);return `<div class="live-control span-6 ${m.status==="Live"?"is-live":""}"><div class="section-title"><div><div class="kicker">${m.match_no} · ${m.stage} · ${esc(m.start_time)}</div><strong>${esc(h)} vs ${esc(a)}</strong></div><span class="badge ${m.status==="Live"?"live":""}">${m.status}</span></div>
         <div class="live-score-inputs">
           <label>${esc(h)}<div class="score-stepper"><button type="button" onclick="stepScore('liveHome_${m.match_no}',-1)">−</button><input id="liveHome_${m.match_no}" type="number" min="0" inputmode="numeric" value="${m.home_score??0}"><button type="button" onclick="stepScore('liveHome_${m.match_no}',1)">+</button></div></label>
@@ -571,7 +589,7 @@ function renderAdmin(){
     </div>
 
     <div class="card span-6 admin-section"><h3>Post announcement</h3><form id="noticeForm" class="admin-grid"><label class="wide">Title<input id="noticeTitle" required></label><label class="wide">Message<textarea id="noticeBody" required></textarea></label><div class="wide"><button class="primary">Publish</button></div></form></div>
-    <div class="card span-6 admin-section"><div class="restart-box"><div class="kicker">TESTING / RESTART</div><h3>Password-protected restart draw</h3><p class="muted">Clears the draw and every match score/result, but keeps your team names and tournament settings.</p><label>Admin password<input id="restartPassword" type="password" placeholder="Enter admin password"></label><label class="check-row"><input id="restartPlayers" type="checkbox"> Also clear registered test players</label><label class="check-row"><input id="restartNotices" type="checkbox"> Also clear announcements</label><div class="actions" style="margin-top:12px"><button type="button" class="danger" onclick="restartDraw()">Restart draw & clear results</button></div></div></div>
+    <div class="card span-6 admin-section"><div class="restart-box"><div class="kicker">FULL DRAW RESET</div><h3>Password-protected restart draw</h3><p class="muted">Clears the draw and every match score/result, but keeps your team names and tournament settings.</p><label>Admin password<input id="restartPassword" type="password" placeholder="Enter admin password"></label><label class="check-row"><input id="restartPlayers" type="checkbox"> Also clear registered test players</label><label class="check-row"><input id="restartNotices" type="checkbox"> Also clear announcements</label><div class="actions" style="margin-top:12px"><button type="button" class="danger" onclick="restartDraw()">Restart draw & clear results</button></div></div></div>
   </div>`;
   $("startDrawBtn")?.addEventListener("click",startDraw);
   $("settingsForm")?.addEventListener("submit",saveSettings);
