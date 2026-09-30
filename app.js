@@ -472,6 +472,91 @@ async function saveSettings(e){
   try{const out=await api("/api/admin/settings",{method:"POST",body:JSON.stringify(payload)});state.data=out.state;renderAll();renderPublicBoard();toast("Tournament settings saved.")}
   catch(e){toast(e.message)}
 }
+const officialTimerKey=no=>`piston_official_timer_${no}`;
+let officialTimerTicker=null;
+
+function readOfficialTimer(no){
+  try{
+    const raw=JSON.parse(localStorage.getItem(officialTimerKey(no))||"null");
+    return raw&&typeof raw==="object"?raw:{elapsedMs:0,running:false,startedAt:0};
+  }catch{
+    return {elapsedMs:0,running:false,startedAt:0};
+  }
+}
+function writeOfficialTimer(no,t){
+  localStorage.setItem(officialTimerKey(no),JSON.stringify(t));
+}
+function officialElapsedMs(no){
+  const t=readOfficialTimer(no);
+  return Math.max(0,Number(t.elapsedMs||0)+(t.running?Date.now()-Number(t.startedAt||Date.now()):0));
+}
+function officialTimerParts(no){
+  const total=Math.floor(officialElapsedMs(no)/1000);
+  return {minute:Math.floor(total/60),second:total%60,total};
+}
+function formatOfficialTimer(no){
+  const p=officialTimerParts(no);
+  return `${String(p.minute).padStart(2,"0")}:${String(p.second).padStart(2,"0")}`;
+}
+function syncOfficialTimerDom(no){
+  const display=$(`officialTimer_${no}`);
+  if(display)display.textContent=formatOfficialTimer(no);
+  const t=readOfficialTimer(no);
+  if(t.running){
+    const p=officialTimerParts(no);
+    const min=$(`officialMin_${no}`),sec=$(`officialSec_${no}`);
+    if(min)min.value=p.minute;
+    if(sec)sec.value=p.second;
+  }
+  const btn=$(`officialTimerStart_${no}`);
+  if(btn)btn.textContent=t.running?"Running…":"▶ Start";
+}
+function ensureOfficialTimerTicker(){
+  if(officialTimerTicker)return;
+  officialTimerTicker=setInterval(()=>{
+    document.querySelectorAll("[data-official-timer]").forEach(el=>syncOfficialTimerDom(el.dataset.officialTimer));
+  },500);
+}
+function startOfficialTimer(no){
+  const t=readOfficialTimer(no);
+  if(!t.running){
+    t.running=true;t.startedAt=Date.now();writeOfficialTimer(no,t);
+  }
+  ensureOfficialTimerTicker();syncOfficialTimerDom(no);
+}
+window.startOfficialTimer=startOfficialTimer;
+
+function pauseOfficialTimer(no){
+  const t=readOfficialTimer(no);
+  if(t.running){
+    t.elapsedMs=Math.max(0,Number(t.elapsedMs||0)+(Date.now()-Number(t.startedAt||Date.now())));
+    t.running=false;t.startedAt=0;writeOfficialTimer(no,t);
+  }
+  syncOfficialTimerDom(no);
+}
+window.pauseOfficialTimer=pauseOfficialTimer;
+
+function resetOfficialTimer(no){
+  if(!confirm("Reset this match stopwatch to 00:00?"))return;
+  writeOfficialTimer(no,{elapsedMs:0,running:false,startedAt:0});
+  const min=$(`officialMin_${no}`),sec=$(`officialSec_${no}`);
+  if(min)min.value=0;if(sec)sec.value=0;
+  syncOfficialTimerDom(no);
+}
+window.resetOfficialTimer=resetOfficialTimer;
+
+function useOfficialTimerTime(no){
+  const p=officialTimerParts(no);
+  const min=$(`officialMin_${no}`),sec=$(`officialSec_${no}`);
+  if(min)min.value=p.minute;if(sec)sec.value=p.second;
+  toast(`Event time set to ${p.minute}:${String(p.second).padStart(2,"0")}.`);
+}
+window.useOfficialTimerTime=useOfficialTimerTime;
+
+function clearAllOfficialTimers(){
+  (state.data?.matches||[]).forEach(m=>localStorage.removeItem(officialTimerKey(m.match_no)));
+}
+
 async function addMatchEvent(matchNo,eventType,teamId,side){
   const minute=Number($(`officialMin_${matchNo}`)?.value||0);
   const second=Number($(`officialSec_${matchNo}`)?.value||0);
@@ -544,6 +629,7 @@ async function resetScoresOnly(){
   try{
     const out=await api("/api/admin/reset-scores",{method:"POST",body:"{}"});
     state.data=out.state;
+    clearAllOfficialTimers();
     renderAll();renderPublicBoard();
     showPage("admin");
     setTimeout(()=>scrollAdminSection("adminLiveSection"),0);
@@ -621,9 +707,20 @@ function renderAdmin(){
             <div><span>${esc(a)}</span><b>${m.away_score??0}</b><small class="${af>=5?"foul-penalty":""}">Fouls: ${af}${af>=5?" · PENALTY":""}</small></div>
           </div>
 
+          <div class="official-stopwatch">
+            <div class="official-stopwatch-display" id="officialTimer_${m.match_no}" data-official-timer="${m.match_no}">${formatOfficialTimer(m.match_no)}</div>
+            <div class="official-stopwatch-actions">
+              <button id="officialTimerStart_${m.match_no}" type="button" class="primary" onclick="startOfficialTimer('${m.match_no}')">${readOfficialTimer(m.match_no).running?"Running…":"▶ Start"}</button>
+              <button type="button" class="secondary" onclick="pauseOfficialTimer('${m.match_no}')">Ⅱ Pause</button>
+              <button type="button" class="secondary" onclick="useOfficialTimerTime('${m.match_no}')">Use time</button>
+              <button type="button" class="ghost" onclick="resetOfficialTimer('${m.match_no}')">↺ Reset</button>
+            </div>
+            <div class="muted official-stopwatch-note">While running, the goal/foul event time below follows the stopwatch automatically. Pause it for halftime or stoppages.</div>
+          </div>
+
           <div class="official-clock-inputs">
-            <label>Minute<input id="officialMin_${m.match_no}" type="number" min="0" max="99" inputmode="numeric" value="0"></label>
-            <label>Second<input id="officialSec_${m.match_no}" type="number" min="0" max="59" inputmode="numeric" value="0"></label>
+            <label>Event minute<input id="officialMin_${m.match_no}" type="number" min="0" max="99" inputmode="numeric" value="${officialTimerParts(m.match_no).minute}"></label>
+            <label>Event second<input id="officialSec_${m.match_no}" type="number" min="0" max="59" inputmode="numeric" value="${officialTimerParts(m.match_no).second}"></label>
           </div>
 
           <div class="official-team-actions">
@@ -719,6 +816,8 @@ function renderAdmin(){
     <div class="card span-6 admin-section"><h3>Post announcement</h3><form id="noticeForm" class="admin-grid"><label class="wide">Title<input id="noticeTitle" required></label><label class="wide">Message<textarea id="noticeBody" required></textarea></label><div class="wide"><button class="primary">Publish</button></div></form></div>
     <div class="card span-6 admin-section"><div class="restart-box"><div class="kicker">FULL DRAW RESET</div><h3>Password-protected restart draw</h3><p class="muted">Clears the draw and every match score/result, but keeps your team names and tournament settings.</p><label>Admin password<input id="restartPassword" type="password" placeholder="Enter admin password"></label><label class="check-row"><input id="restartPlayers" type="checkbox"> Also clear registered test players</label><label class="check-row"><input id="restartNotices" type="checkbox"> Also clear announcements</label><div class="actions" style="margin-top:12px"><button type="button" class="danger" onclick="restartDraw()">Restart draw & clear results</button></div></div></div>
   </div>`;
+  ensureOfficialTimerTicker();
+  document.querySelectorAll("[data-official-timer]").forEach(el=>syncOfficialTimerDom(el.dataset.officialTimer));
   $("startDrawBtn")?.addEventListener("click",startDraw);
   $("settingsForm")?.addEventListener("submit",saveSettings);
   $("noticeForm")?.addEventListener("submit",postNotice);
