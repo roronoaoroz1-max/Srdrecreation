@@ -202,7 +202,7 @@ function playerOptionsForTeam(teamId){
 function topScorers(){
   const counts=new Map();
   for(const e of (state.data?.events||[])){
-    if(!["goal","penalty_goal"].includes(e.event_type)||!e.player_id)continue;
+    if(e.event_type!=="goal"||!e.player_id)continue;
     counts.set(e.player_id,(counts.get(e.player_id)||0)+1);
   }
   return [...counts.entries()].map(([player_id,goals])=>{
