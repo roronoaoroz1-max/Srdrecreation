@@ -666,3 +666,48 @@ body.projector-mode .public-event-item{font-size:16px}
   .official-stopwatch-actions{grid-template-columns:1fr 1fr}
   .official-stopwatch-display{font-size:44px}
 }
+
+
+/* V4.10: Golden Boot / top scorers */
+.scorer-row{
+  display:grid;
+  grid-template-columns:30px minmax(0,1fr) auto;
+  gap:9px;
+  align-items:center;
+  padding:9px 0;
+  border-bottom:1px solid var(--line);
+}
+.scorer-row:last-child{border-bottom:0}
+.scorer-rank{
+  width:26px;height:26px;border-radius:50%;
+  display:grid;place-items:center;
+  background:#172a43;color:var(--muted);
+  font-size:12px;font-weight:900;
+}
+.scorer-row.leader .scorer-rank{
+  background:#2b3b18;color:#fef3a7;
+}
+.scorer-player{display:grid;gap:2px;min-width:0}
+.scorer-player strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.scorer-player small{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.scorer-goals{
+  min-width:34px;
+  text-align:center;
+  font-size:20px;
+  color:var(--accent2);
+}
+.public-scorer-card .kicker{margin-bottom:2px}
+
+/* Four useful public panels on wider screens, stacking down cleanly elsewhere */
+@media(min-width:1100px){
+  .public-details-grid{grid-template-columns:.72fr 1fr 1fr .88fr}
+}
+@media(min-width:561px) and (max-width:1099px){
+  .public-details-grid{grid-template-columns:1fr 1fr}
+  .public-info-panel{grid-column:auto}
+}
+body.projector-mode .public-details-grid{
+  grid-template-columns:.72fr 1fr 1fr .9fr;
+}
+body.projector-mode .scorer-row{font-size:16px}
+body.projector-mode .scorer-goals{font-size:24px}
