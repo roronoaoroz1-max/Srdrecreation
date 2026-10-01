@@ -199,6 +199,37 @@ function playerOptionsForTeam(teamId){
   return `<option value="">Select player...</option>`+ps.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join("");
 }
 
+function topScorers(){
+  const counts=new Map();
+  for(const e of (state.data?.events||[])){
+    if(!["goal","penalty_goal"].includes(e.event_type)||!e.player_id)continue;
+    counts.set(e.player_id,(counts.get(e.player_id)||0)+1);
+  }
+  return [...counts.entries()].map(([player_id,goals])=>{
+    const p=(state.data?.players||[]).find(x=>x.id===player_id);
+    return {
+      player_id,
+      name:p?.name||"Unknown player",
+      team_id:p?.team_id||"",
+      team_name:teamById(p?.team_id)?.name||"",
+      goals
+    };
+  }).sort((a,b)=>b.goals-a.goals||a.name.localeCompare(b.name));
+}
+function scorerRows(limit=5){
+  const rows=topScorers().slice(0,limit);
+  if(!rows.length)return `<p class="muted">No goals recorded yet.</p>`;
+  let lastGoals=null,rank=0,shown=0;
+  return rows.map(s=>{
+    shown++;
+    if(s.goals!==lastGoals){rank=shown;lastGoals=s.goals;}
+    return `<div class="scorer-row ${rank===1?"leader":""}">
+      <span class="scorer-rank">${rank}</span>
+      <div class="scorer-player"><strong>${esc(s.name)}</strong><small>${esc(s.team_name)}</small></div>
+      <b class="scorer-goals">${s.goals}</b>
+    </div>`;
+  }).join("");
+}
 function renderPublicBoard(){
   const body=$("publicBoardBody");if(!body||!state.data)return;
   const ms=state.data.matches||[];
@@ -249,6 +280,7 @@ function renderPublicBoard(){
       ${info}
       <div class="public-match"><div class="section-title"><h3>Upcoming</h3><span class="badge">${upcoming.length}</span></div>${upcoming.slice(live?0:1,live?4:5).map(fixture).join("")||`<p class="muted">No other upcoming matches assigned.</p>`}</div>
       <div class="public-match"><div class="section-title"><h3>Recent results</h3><span class="badge">${finished.length}</span></div>${finished.length?finished.map(fixture).join(""):`<p class="muted">No results yet.</p>`}</div>
+      <div class="public-match public-scorer-card"><div class="section-title"><div><div class="kicker">GOLDEN BOOT</div><h3>Top Scorers</h3></div><span class="badge">Goals</span></div>${scorerRows(5)}</div>
     </div>`;
 }
 const myTeam=()=>state.role==="player"?state.player?.team_id:null;
@@ -276,7 +308,8 @@ function renderHome(){
     <div class="card span-3"><div class="muted">${state.role==="player"?"Be at stadium by":"Start"}</div><div class="stat">${state.role==="player"?esc(arr):esc(c.start_time)}</div><div class="kicker">${state.role==="player"?(n?`${esc(n.match_no)} starts ${esc(n.start_time)}`:"No match yet"):esc(c.date)}</div></div>
     <div class="card span-8"><div class="section-title"><h3>${state.role==="player"?"Your tournament":"Tournament status"}</h3><button class="secondary" onclick="showPage('bracket')">Open bracket</button></div>${state.role==="player"?(n?`${arrivalNote(n)}${fixture(n)}`:`<div class="notice">${state.data.draw.completed?"No upcoming match assigned.":"The official draw has not started yet."}</div>`):`<div class="notice"><strong>${state.data.draw.completed?"Draw completed.":"Ready for the official draw."}</strong><br>${state.data.draw.completed?"Use Live Match Control in Admin to publish scores instantly.":"Open Admin and start the draw."}</div>`}</div>
     <div class="card span-4"><h3>Match format</h3><div class="row"><span>First half</span><b>${c.first_half} min</b></div><div class="row"><span>Halftime</span><b>${c.halftime} min</b></div><div class="row"><span>Second half</span><b>${c.second_half} min</b></div><div class="row"><span>Changeover</span><b>${c.changeover} min</b></div>${state.role==="player"?`<div class="row"><span>Arrive before kickoff</span><b>${arrivalMinutes()} min</b></div>`:""}</div>
-    <div class="card span-12"><div class="section-title"><h3>Latest notices</h3><button class="secondary" onclick="showPage('notices')">All notices</button></div>${state.data.announcements.slice(0,3).map(a=>`<div class="row"><div><strong>${esc(a.title)}</strong><div class="muted">${esc(a.body)}</div></div></div>`).join("")||`<p class="muted">No announcements yet.</p>`}</div>
+    <div class="card span-4"><div class="section-title"><div><div class="kicker">GOLDEN BOOT</div><h3>Top scorers</h3></div><span class="badge">Goals</span></div>${scorerRows(5)}</div>
+    <div class="card span-8"><div class="section-title"><h3>Latest notices</h3><button class="secondary" onclick="showPage('notices')">All notices</button></div>${state.data.announcements.slice(0,3).map(a=>`<div class="row"><div><strong>${esc(a.title)}</strong><div class="muted">${esc(a.body)}</div></div></div>`).join("")||`<p class="muted">No announcements yet.</p>`}</div>
   </div>`;
 }
 function renderDraw(){
